@@ -5,5 +5,5 @@ return {
     description = 'Shows information on installed mods',
     name        = 'Mod Info',
     author      = 'Curve',
-    version     = 'v1.1',
+    version     = 'v1.2',
 }
