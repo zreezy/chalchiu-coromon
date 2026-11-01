@@ -103,10 +103,17 @@ jobs:
           (cd package && zip -qr "../chalchiu-${TAG}.zip" .)
 
           # Release notes: the matching "## [x.y.z]" section of CHANGELOG.md
+          # CHANGELOG.md is wrapped at ~115 columns; release pages show every line break, so join
+          # wrapped lines back into their paragraph or list item.
           changes=$(awk -v v="$VERSION" '
             /^## \[/ { found = index($0, "[" v "]") > 0; next }
             found { print }
-          ' CHANGELOG.md)
+          ' CHANGELOG.md | awk '
+            /^[[:space:]]*$/ { if (buf != "") print buf; buf = ""; print ""; next }
+            /^(#|- |\* |[0-9]+\. )/ { if (buf != "") print buf; buf = $0; next }
+            { sub(/^[[:space:]]+/, ""); buf = (buf == "") ? $0 : buf " " $0 }
+            END { if (buf != "") print buf }
+          ')
 
           if [ -z "$changes" ]; then
             changes=$(git log -1 --format='%s%n%n%b')
