@@ -89,6 +89,8 @@ log.info("Gave", amount, "gold") -- [my_mod] Gave 5000 gold
 
 chalchiu itself logs setting changes and saves, hotkey presses and key captures.
 
+`chalchiu.version` is the loader version as a string, e.g. `"3.4.0"`.
+
 ## Globals
 
 Each mod runs in its own Lua environment and can't write to the game's globals directly. `globals` is the game's

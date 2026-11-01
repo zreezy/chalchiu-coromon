@@ -34,6 +34,23 @@ chalchiu = {
   read_mod_file = function(id, name) return files[id .. "/" .. name] end,
   write_mod_file = function(id, name, content) files[id .. "/" .. name] = content; return true end,
   mods = function() return loadedMods end,
+  version = "3.3.0",
+}
+
+-- Solar2D network/system stand-ins for the update check: GitHub answers right away
+local networkRequests, openedURLs = {}, {}
+network = {
+  request = function(url, method, listener, params)
+    networkRequests[#networkRequests + 1] = { url = url, method = method, params = params }
+    listener({ isError = false, status = 200,
+      response = '{"tag_name":"v3.10.0","html_url":"https://github.com/zreezy/chalchiu-coromon/releases/tag/v3.10.0"}' })
+  end,
+}
+system = { openURL = function(url) openedURLs[#openedURLs + 1] = url end }
+json = {
+  decode = function(text)
+    return { tag_name = text:match('"tag_name":"([^"]+)"'), html_url = text:match('"html_url":"([^"]+)"') }
+  end,
 }
 
 local keyListener
@@ -300,6 +317,13 @@ check(#popups == 2 and popups[2].title == "Loaded Mods", "Mods button should ope
 title:new()
 check(#popups == 2 and #containers == 2, "startup popup only once, button on every title screen")
 
+-- Update check: once per game start, newer release (3.10.0 > 3.3.0) shown first in the list
+check(#networkRequests == 1 and networkRequests[1].url:find("api.github.com/repos/zreezy/chalchiu%-coromon/releases/latest")
+  and networkRequests[1].params.headers["User-Agent"] == "chalchiu/3.3.0", "one update check with a User-Agent")
+check(lastToast():find("v3.10.0 is available"), "update toast")
+local startupList = popups[1]
+check(startupList.items[1].isUpdate and startupList.items[1].version == "v3.10.0", "update row first in the list")
+
 -- Descriptions must stay short: the popup sizes its description area to the longest one
 for _, mod in ipairs(loadedMods) do
   check(#mod.description() <= 160, "description of '" .. mod.name() .. "' is too long (" .. #mod.description() .. " chars)")
@@ -401,6 +425,9 @@ end
 
 -- Mod Info settings page: open trainer settings, cycle a choice, rebind a key
 local list = popups[2]
+check(buttonLabel(list, 1) == "Download", "update row button says Download")
+confirm(list, 1)
+check(openedURLs[1] == "https://github.com/zreezy/chalchiu-coromon/releases/tag/v3.10.0", "Download opens the release page")
 check(list.cancelButton and list.recreate, "mod list has a close button and per-row button labels")
 check(list.onStart and list.onBack, "Start (Esc) and Back keys close the list")
 check(not list.cancellable, "clicking outside the popup doesn't close it")

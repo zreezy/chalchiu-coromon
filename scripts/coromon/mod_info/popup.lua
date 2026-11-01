@@ -1,5 +1,6 @@
 local AbstractSelectPopup = globals.require("classes.interface.overlays.AbstractSelectPopup")
 local MessageToast = globals.require("classes.interface.overlays.MessageToast")
+local updates = require("updates")
 
 -- The Loaded Mods popup and each mod's settings page, built on the game's AbstractSelectPopup.
 --
@@ -214,6 +215,18 @@ function _M:new(selectedConfig, source)
     local mods  = chalchiu:mods()
     local items = {}
 
+    -- A newer chalchiu release on GitHub goes first, so it's selected when the list opens
+    if updates.latest then
+        table.insert(items, {
+            shouldBeShown = always,
+            isUpdate = true,
+            name = "Update available!",
+            version = "v" .. updates.latest.version,
+            description = "chalchiu v" .. updates.latest.version .. " is out (you have v" .. tostring(updates.installed)
+                .. "). Press Download to open the release page, then unzip it over your game folder. Settings are kept.",
+        })
+    end
+
     for i = 1, #mods do
         local config = chalchiu.settings.get(mods[i]:id())
         local hasSettings = config ~= nil and #config:entries() > 0
@@ -232,12 +245,12 @@ function _M:new(selectedConfig, source)
     local params = AbstractSelectPopup:newParams("Loaded Mods", items, function(container, item)
         label(container, item.name, "centerLeft")
         label(container, item.version, "center")
-        label(container, "(by " .. item.author .. ")", "centerRight")
+        label(container, item.isUpdate and "New!" or ("(by " .. item.author .. ")"), "centerRight")
     end)
 
     params:setGetDescriptionFunction(function(item, width)
         local text = item.description
-        if not item.config then
+        if not item.config and not item.isUpdate then
             text = text .. "\nThis mod has no settings."
         end
         return description(text, width)
@@ -257,9 +270,16 @@ function _M:new(selectedConfig, source)
     end
 
     actionButton(params, "Loaded Mods", describe, function(item)
+        if item and item.isUpdate then
+            return "Download"
+        end
         return (item and item.config) and "Settings" or "Close"
     end, function(item, closePopup)
-        if item and item.config then
+        if item and item.isUpdate then
+            closePopup(function()
+                updates.openDownload()
+            end)
+        elseif item and item.config then
             closePopup(function()
                 _M:openSettings(item.name, item.config)
             end)

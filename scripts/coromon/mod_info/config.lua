@@ -22,6 +22,13 @@ return settings.define({
     description = "Show an info button next to the gold counter in the pause menu. Takes effect the next time the pause menu opens.",
   },
   {
+    key = "checkForUpdates",
+    label = "Check for updates",
+    type = "boolean",
+    default = true,
+    description = "When the game starts, ask GitHub if a newer chalchiu release is out, and show it in the mod list.",
+  },
+  {
     key = "openKey",
     label = "Key: Open mod list",
     type = "key",

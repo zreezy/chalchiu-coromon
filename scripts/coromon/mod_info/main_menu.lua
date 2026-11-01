@@ -1,5 +1,6 @@
 local popup = require("popup")
 local config = require("config")
+local updates = require("updates")
 
 -- Title screen: show the mod list once on startup, and add a "Mods" button in the top-right corner.
 -- The bottom corners are used by the game's social media buttons. Written against Coromon v1.5.4.
@@ -30,6 +31,8 @@ local once = false
 hooks.add("classes.interface.screens.titleScreen", function(module)
     detour(module, "new", function(original, ...)
         local screen = original(...)
+
+        updates.check() -- once per game start, see updates.lua
 
         if config.mainMenuButton then
             local ok, err = pcall(addModsButton, screen)

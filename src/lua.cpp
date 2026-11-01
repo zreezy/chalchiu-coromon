@@ -113,6 +113,9 @@ namespace chalchiu
     {
         m_impl->state["chalchiu"] = m_impl->state.create_table();
 
+        //? Loader version (e.g. "3.3.0"), used by Mod Info's update check
+        m_impl->state["chalchiu"]["version"] = version;
+
         //? Logging from Lua. Only takes strings, so it is safe to call from any coroutine.
         m_impl->state["chalchiu"]["log"] = [](const std::string &level, const std::string &message) {
             if (level == "error")

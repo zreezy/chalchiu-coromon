@@ -39,6 +39,11 @@ directly while the game is closed. Delete it to go back to the defaults.
 
 Shows the installed mods, their versions and authors, and opens each mod's settings page.
 
+It also tells you when a new chalchiu release is out: when the game starts it asks GitHub for the latest release,
+and if it's newer than yours you get a message on the title screen and an **Update available!** row at the top of
+the mod list. Its **Download** button opens the release page in your browser. Nothing else is sent, and you can turn
+this off with **Check for updates**.
+
 <img src="../assets/settings_mod_info.jpg" alt="Mod Info settings" width="420">
 
 | Setting | Default |
@@ -46,6 +51,7 @@ Shows the installed mods, their versions and authors, and opens each mod's setti
 | Show mod list on startup | On |
 | Main menu button (the **Mods** button on the title screen) | On |
 | Pause menu button (info button next to your gold) | On |
+| Check for updates (asks GitHub once per game start) | On |
 | Key: Open mod list | Not set |
 
 ## Coromon Trainer

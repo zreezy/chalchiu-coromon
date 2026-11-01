@@ -3,6 +3,19 @@
 Releases are published automatically when the version in `CMakeLists.txt` changes.
 The section for that version below becomes the release notes.
 
+## [3.4.0] - 2026-11-01
+
+### Update notifications (Mod Info v1.7)
+- When the game starts, Mod Info checks GitHub for a newer chalchiu release. If there is one, you get a message on
+  the title screen and an **Update available!** row at the top of the mod list, whose **Download** button opens the
+  release page.
+- One request to GitHub per game start, nothing else is sent. Turn it off with the new **Check for updates**
+  setting. If the check fails (offline, rate limited) it's only noted in `chalchiu.log`.
+- Releases before this one can't tell you about updates, so this is the last one you need to find by hand.
+
+### For modders
+- `chalchiu.version` holds the loader version (e.g. `"3.4.0"`).
+
 ## [3.3.0] - 2026-11-01
 
 ### Area Encounter Info (v1.1)

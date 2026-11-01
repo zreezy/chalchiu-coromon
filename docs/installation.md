@@ -38,6 +38,9 @@ Back up your saves before using mods, and see the warning in the [README](../REA
 
 ## Update
 
+When a new release is out, Mod Info shows a message on the title screen and an **Update available!** row in the mod
+list, with a **Download** button that opens the release page (you can turn this off in Mod Info's settings).
+
 Unzip the new release over the old files and replace them when asked. Your mod settings
 (`mods/<mod>/settings.lua`) are not in the zip, so they are kept. If the [changelog](../CHANGELOG.md) says a mod was
 removed, delete its folder from `mods`.
