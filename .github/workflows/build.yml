@@ -120,7 +120,7 @@ jobs:
             echo "3. Mods go in \`mods/\`. The \`optional/\` folder has extra mods (e.g. \`debug\`) you can copy into \`mods/\` if you want them."
             echo "4. Start the game. A \`chalchiu.log\` file is created, and the window title shows the chalchiu version and how many mods loaded."
             echo
-            echo "When updating, replace the mod folders instead of unzipping over them, so removed files don't linger."
+            echo "When updating, unzip over the old files. Your mod settings (\`mods/<mod>/settings.lua\`) are not in the zip, so they are kept."
             echo
             echo "## Changes"
             echo "$changes"

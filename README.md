@@ -34,8 +34,13 @@ The [wiki](https://github.com/zreezy/chalchiu-coromon/wiki) has everything in th
 
 The installation of chalchiu is fairly simple:
 
+* Check your game version: in Coromon, open **Settings → General** and scroll to **App version** at the bottom.
+  This release supports **v1.5.4**; on other versions some mods may not work.
+
+  ![Where to find the game version: Settings, General, App version](assets/game_version_settings.jpg)
+
 * Locate your Game Folder
-  > e.g. `C:/GOG Games/Coromon/`
+  > e.g. `C:/Program Files (x86)/Steam/steamapps/common/Coromon/` (Steam: right-click Coromon → Manage → Browse local files)
 
 * Download the zip file from the latest [Release](https://github.com/zreezy/chalchiu-coromon/releases/latest) and unpack all files into the game directory
   * Your Game Folder should now roughly look like this
@@ -55,6 +60,9 @@ The installation of chalchiu is fairly simple:
   * A Log File named `chalchiu.log` is created
   * A Folder named `mods` is created in the game directory
   * Your Game Window Title includes information about the loaded mods
+
+* Updating: unzip the new release over the old files, replacing `iphlpapi.dll` and the mod files. Your mod settings
+  (`mods/<mod>/settings.lua`) are not in the zip, so they are kept. If the changelog says a mod was removed, delete its folder.
 
 # Coromon
 

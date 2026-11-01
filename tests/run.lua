@@ -128,7 +128,12 @@ local typeWriterFactor
 local textHelperModule = {
   setTypeWriterSpeedFactor = function(_, factor) typeWriterFactor = factor end,
   new = function() return displayObject() end,
-  newPrepared = function() return displayObject() end,
+  newPrepared = function(_, _, options)
+    local object = displayObject()
+    object.width = type(options) == "table" and options.text and #options.text * 5 or 10
+    return object
+  end,
+  spawnPrepared = function(_, _, prepared) return prepared end,
 }
 
 local playerStatsModule = {
@@ -190,10 +195,23 @@ playerStats = playerStatsModule
 battleEffectUtility = battleEffectUtilityModule
 imageHelper = { new = function() return displayObject() end }
 magnet = setmetatable({}, { __index = function() return function() end end })
-inputHelper = { addTouchable = function() end }
-UIButton = { createTouchableListener = function() return function() end end }
+local touchables = {}
+inputHelper = {
+  addTouchable = function(_, object, listener) touchables[#touchables + 1] = { object = object, listener = listener } end,
+  addMouseHoverable = function() end,
+}
+UIButton = {
+  createTouchableListener = function(_, _, onPress) return onPress end,
+  showHoverVariantOnHover = function() return function() end end,
+}
 UIButtonTransition = { fancyPress = "fancyPress" }
-UIContainerStyle = { gradient_blueOrFluorescent = "blue" }
+UIContainerStyle = { gradient_blueOrFluorescent = { getFontOutlineFillEffect = function() return "fill" end } }
+local containers = {}
+UIContainerBuilder = { new = function(_, parent, style, width, height)
+  local object = displayObject(); object.width, object.height, object.parent = width, height, parent
+  containers[#containers + 1] = object
+  return object
+end }
 
 ---------------------------------------------------------------------------------------------------
 -- Load the runtime and mods like chalchiu does
@@ -242,10 +260,25 @@ check(#loadedMods == 6, "expected 6 mods, loaded " .. #loadedMods)
 -- Scenarios
 ---------------------------------------------------------------------------------------------------
 
--- Title screen: Mod Info popup on startup, text speed re-applied
+-- Title screen: Mod Info popup on startup, Mods button, text speed re-applied
 local title = require("classes.interface.screens.titleScreen")
 title:new()
 check(#popups == 1 and popups[1].title == "Loaded Mods", "Loaded Mods popup should open on the title screen")
+check(#containers == 1 and containers[1].parent == "title", "Mods button should be added to the title screen")
+touchables[#touchables].listener()
+check(#popups == 2 and popups[2].title == "Loaded Mods", "Mods button should open the mod list")
+title:new()
+check(#popups == 2 and #containers == 2, "startup popup only once, button on every title screen")
+
+-- Descriptions must stay short: the popup sizes its description area to the longest one
+for _, mod in ipairs(loadedMods) do
+  check(#mod.description() <= 160, "description of '" .. mod.name() .. "' is too long (" .. #mod.description() .. " chars)")
+end
+for _, entry in ipairs(chalchiu.settings.all()) do
+  for _, setting in ipairs(entry.config:entries()) do
+    check(#(setting.description or "") <= 160, "setting description too long: " .. entry.id .. "." .. setting.key)
+  end
+end
 check(typeWriterFactor == 6, "text speed should be 6x, got " .. tostring(typeWriterFactor))
 
 -- Text speed follows its setting, and "use game setting" falls back to the game's value
@@ -308,7 +341,7 @@ require("classes.interface.screens.SquadScreen"):new()
 check(topBarObjects[1] == "right", "pause menu button added to the right of the top bar")
 
 -- Mod Info settings page: open trainer settings, cycle a choice, rebind a key
-local list = popups[1]
+local list = popups[2]
 confirm(list, findItem(list, "name", "Coromon Trainer"))
 local page = popups[#popups]
 check(page.title == "Coromon Trainer Settings", "trainer settings page opens")

@@ -145,8 +145,8 @@ function _M:new()
 
     params:setGetDescriptionFunction(function(item, width)
         local text = item.description
-        if item.config then
-            text = text .. "\n\nPress the check button to change this mod's settings."
+        if item.config and not text:find("check button", 1, true) then
+            text = text .. " Press the check button for settings."
         end
         return description(text, width)
     end)

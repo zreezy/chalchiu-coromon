@@ -1,17 +1,15 @@
 local trainer = require("hooks")
 
+-- Keep this short: the Loaded Mods popup sizes its description area to the longest description,
+-- so a long one squeezes out the mod list. The hotkeys are listed on the settings page instead.
 local function getDescription()
-	local rtn = "A Coromon Trainer. Press the check button to change keys and amounts.\n"
-	for _, action in ipairs(trainer.actions) do
-		local key = trainer.config:format(action[1])
-		rtn = rtn .. string.format("[%s] %s\n", key, action[2])
-	end
-	return rtn
+	return "Hotkeys for game speed, noclip, catching, skipping battles, gold, items and more. "
+		.. "Press the check button to see and change the keys."
 end
 
 return {
 	name        = 'Coromon Trainer',
 	description = getDescription(),
 	author      = 'Curve',
-	version     = 'v1.3',
+	version     = 'v1.4',
 }

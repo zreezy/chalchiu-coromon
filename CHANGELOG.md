@@ -3,6 +3,22 @@
 Releases are published automatically when the version in `CMakeLists.txt` changes.
 The section for that version below becomes the release notes.
 
+## [3.2.0] - 2026-11-01
+
+### Mod Info (v1.4)
+- New **Mods** button in the top-right corner of the title screen that opens the Loaded Mods popup.
+- New settings: turn the title screen button off, and an optional hotkey to open the mod list.
+- Fixed the Loaded Mods popup layout: long mod descriptions pushed the mod list out of view and the
+  text overflowed above the popup.
+
+### Coromon Trainer (v1.4)
+- Shorter description (the hotkeys are listed on its settings page).
+
+### Docs
+- README/wiki: how to find your game version (Settings → General → App version), and how to update
+  without losing your mod settings.
+- The wiki is generated from the README and the game reference (`gamedocs.py wiki`).
+
 ## [3.1.0] - 2026-11-01
 
 ### New mods

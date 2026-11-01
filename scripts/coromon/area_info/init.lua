@@ -44,7 +44,7 @@ end, "Show area encounters")
 
 return {
   name        = 'Area Encounter Info',
-  description = "Press the hotkey (numPad0 by default) in the overworld to see which Coromon live in your current area, their chances, and which ones you've seen. Uses the game's own world map popup.",
+  description = "Press numPad0 in the overworld to see the Coromon in your area, their chances and which ones you've seen.",
   author      = 'Zreezy',
   version     = 'v1.0',
 }

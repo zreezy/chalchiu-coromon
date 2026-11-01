@@ -42,7 +42,7 @@ end)
 
 return {
   name        = 'XP & Gold Boost',
-  description = 'Multiplies XP earned in battles and gold from trainer battles. Defaults to 2x XP. Has no effect in online battles.',
+  description = 'Multiplies battle XP (2x by default) and trainer gold. No effect in online battles.',
   author      = 'Zreezy',
   version     = 'v1.0',
 }
