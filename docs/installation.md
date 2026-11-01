@@ -1,5 +1,8 @@
 # Installation
 
+This page is for Windows. On a **Steam Deck** or another Linux PC, follow [Steam Deck](steam-deck.md) instead: same
+files, plus one Steam launch option. The macOS version of Coromon isn't supported.
+
 ## Install
 
 1. **Check your game version.** In Coromon, open **Settings → General** and scroll to **App version** at the bottom.

@@ -22,6 +22,7 @@ HTML_SRC = re.compile(r"""(<img\b[^>]*\bsrc=)(["']?)([^"'\s>]+)\2""", re.IGNOREC
 # Guides in docs/ -> wiki page (in sidebar order)
 GUIDE_PAGES = {
     "docs/installation.md": "Installation",
+    "docs/steam-deck.md": "Steam-Deck",
     "docs/mods.md": "Mods",
     "docs/writing-mods.md": "Writing-Mods",
     "docs/releasing.md": "Releasing",

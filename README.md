@@ -40,6 +40,10 @@ of the game's code. The same pages are in [docs](docs) in this repository.
    (Steam: right-click Coromon → **Manage** → **Browse local files**).
 4. Start the game. The window title shows the chalchiu version, and the **Loaded Mods** list opens.
 
+**Steam Deck:** works too, through Proton. Do the same in Desktop Mode, then add the Steam launch option
+`WINEDLLOVERRIDES="iphlpapi=n,b" %command%`. Step by step: [Steam Deck](https://github.com/zreezy/chalchiu-coromon/wiki/Steam-Deck).
+The macOS version of Coromon isn't supported.
+
 To **update**, unzip a new release over the old files. Your mod settings are kept. To **remove** chalchiu, delete
 `iphlpapi.dll` and the `mods` folder. More detail and troubleshooting: [Installation](https://github.com/zreezy/chalchiu-coromon/wiki/Installation).
 
@@ -47,14 +51,14 @@ To **update**, unzip a new release over the old files. Your mod settings are kep
 
 ![The Mods button in the top right of the title screen](assets/title_screen_mods_button.jpg)
 
-| Mod | What it does |
-|---|---|
-| **Mod Info** | Lists the installed mods and lets you change their settings in-game (title screen **Mods** button) |
-| **Coromon Trainer** | Hotkeys for game speed, noclip, catch all, skipping battles, maxing your squad, gold, items and more |
-| **Potent Alert** | Notification and sound when a potent or perfect Coromon appears |
-| **XP & Gold Boost** | Multiplies battle XP (2x by default) and trainer gold. No effect online |
-| **Text Speed+** | Dialogue text faster than the game's 3x maximum (6x by default) |
-| **Area Encounter Info** | Press `numPad0` to list the Coromon in your current area, how common they are and which you've seen |
+| Mod | What it does | Settings |
+|---|---|---|
+| **Mod Info** | Lists the installed mods and lets you change their settings in-game (title screen **Mods** button) | <img src="assets/settings_mod_info.jpg" alt="Mod Info settings" width="240"> |
+| **Coromon Trainer** | Hotkeys for game speed, noclip, catch all, skipping battles, maxing your squad, gold, items and more | <img src="assets/settings_trainer.jpg" alt="Coromon Trainer settings" width="240"> |
+| **Potent Alert** | Notification and sound when a potent or perfect Coromon appears | <img src="assets/settings_potent_alert.jpg" alt="Potent Alert settings" width="240"> |
+| **XP & Gold Boost** | Multiplies battle XP (2x by default) and trainer gold. No effect online | <img src="assets/settings_xp_gold_boost.jpg" alt="XP & Gold Boost settings" width="240"> |
+| **Text Speed+** | Dialogue text faster than the game's 3x maximum (6x by default) | <img src="assets/settings_text_speed.jpg" alt="Text Speed+ settings" width="240"> |
+| **Area Encounter Info** | Press `numPad0` to list the Coromon in your current area, how common they are and which you've seen | <img src="assets/settings_area_info.jpg" alt="Area Encounter Info settings" width="240"> |
 
 Every setting and hotkey can be changed in-game: **Mods** → select a mod → **Settings**. Changes save automatically.
 Default keys, settings and screenshots: [Mods](https://github.com/zreezy/chalchiu-coromon/wiki/Mods).

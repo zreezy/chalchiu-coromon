@@ -27,6 +27,8 @@ Every mod's settings, including all hotkeys, can be changed in-game:
 4. Press the red button (or `Esc` / `Backspace`) to go back to the list, and again to close it. Clicking outside
    the popup does nothing.
 
+On a Steam Deck, tap the **Mods** button, then use **A** and **B** or tap. See [Steam Deck](steam-deck.md#controls).
+
 Coromon's keys apply here too: `Space` or `Z` presses the blue button, and the game's Start keys (`Esc`, `Enter`,
 `Right Shift`) and Back keys (`Backspace`, `X`, `Left Shift`) go back.
 
@@ -37,7 +39,7 @@ directly while the game is closed. Delete it to go back to the defaults.
 
 Shows the installed mods, their versions and authors, and opens each mod's settings page.
 
-![Mod Info Screenshot](../assets/mod_info_screenshot.png)
+<img src="../assets/settings_mod_info.jpg" alt="Mod Info settings" width="420">
 
 | Setting | Default |
 |---|---|
@@ -51,7 +53,9 @@ Shows the installed mods, their versions and authors, and opens each mod's setti
 Hotkeys for cheats and conveniences. Battle cheats are switched off automatically when an online battle starts and
 can't be turned on during one.
 
-![Trainer Screenshot](../assets/trainer_screenshot.png)
+![Noclip: walking through a building](../assets/trainer_noclip.jpg)
+
+<img src="../assets/settings_trainer.jpg" alt="Coromon Trainer settings" width="420">
 
 | Default key | Action |
 |---|---|
@@ -77,17 +81,23 @@ A notification and sound when a potent or perfect Coromon appears in a wild batt
 
 Settings: **Alert for potent Coromon**, **Alert for perfect Coromon** and **Play a sound** (all on by default).
 
+<img src="../assets/settings_potent_alert.jpg" alt="Potent Alert settings" width="420">
+
 ## XP & Gold Boost
 
 Multiplies the XP earned in battles and the gold from trainer battles. No effect in online battles.
 
 Settings: **XP multiplier** (2x by default) and **Trainer gold multiplier** (off by default), each from off up to 10x.
 
+<img src="../assets/settings_xp_gold_boost.jpg" alt="XP & Gold Boost settings" width="420">
+
 ## Text Speed+
 
 Makes dialogue text faster than the game's 3x maximum.
 
 Settings: **Text speed**: use the game's setting, 4x, 6x (default), 10x or 25x.
+
+<img src="../assets/settings_text_speed.jpg" alt="Text Speed+ settings" width="420">
 
 ## Area Encounter Info
 
@@ -101,11 +111,20 @@ Press `numPad0` in the overworld to list the Coromon that live in your current a
 Select a row to read its dex description. The blue **Pictures** button opens the game's own world map popup for the
 area. Doesn't work during battles, or when your save randomizes every encounter.
 
+<img src="../assets/area_info_list.jpg" alt="Area Encounter Info list" width="420">
+
+The **Pictures** view, here with **Show undiscovered Coromon** turned on (otherwise Coromon you haven't seen are
+silhouettes):
+
+![The game's world map popup for the area](../assets/area_info_pictures.jpg)
+
 | Setting | Default |
 |---|---|
 | Key: Show area encounters | `numPad0` |
 | View: **List with names** or **Game's map popup** (what the key opens) | List with names |
 | Show undiscovered Coromon: reveal names in the list and pictures in the game's popup (spoilers) | Off |
+
+<img src="../assets/settings_area_info.jpg" alt="Area Encounter Info settings" width="420">
 
 ## Optional: debug
 
