@@ -3,6 +3,22 @@
 Releases are published automatically when the version in `CMakeLists.txt` changes.
 The section for that version below becomes the release notes.
 
+## [3.4.1] - 2026-11-01
+
+New here? chalchiu adds mods to Coromon v1.5.4: an in-game mod menu with settings for every mod (**Mods** button on
+the title screen), a trainer (game speed, noclip, catch all, gold, items and more), Potent Alert, XP & Gold Boost,
+Text Speed+ and Area Encounter Info. From this version on, the mod menu tells you when there's an update.
+
+### Fixes
+- Hotkeys no longer fire while you're typing a name (your character, a Coromon, your online profile), so numpad
+  digits there don't add gold and so on.
+- `chalchiu.log` starts fresh every time the game starts, instead of growing forever. The previous session is kept
+  as `chalchiu.previous.log`.
+- The update check only ever opens GitHub links.
+
+### Docs
+- Release notes now include the Steam Deck launch option and a link to the wiki.
+
 ## [3.4.0] - 2026-11-01
 
 ### Update notifications (Mod Info v1.7)

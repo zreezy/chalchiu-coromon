@@ -30,7 +30,7 @@ files, plus one Steam launch option. The macOS version of Coromon isn't supporte
    ```
 
 4. **Start the game.** You should see:
-   - a `chalchiu.log` file in the game folder,
+   - a `chalchiu.log` file in the game folder (`chalchiu.previous.log` has the session before),
    - the chalchiu version and the number of loaded mods in the window title,
    - the **Loaded Mods** list on startup (you can turn this off in Mod Info's settings).
 
@@ -48,7 +48,7 @@ removed, delete its folder from `mods`.
 ## Remove
 
 - **One mod:** delete its folder from `mods`.
-- **Everything:** delete `iphlpapi.dll`, `mods`, `optional` and `chalchiu.log` from the game folder. Without
+- **Everything:** delete `iphlpapi.dll`, `mods`, `optional`, `chalchiu.log` and `chalchiu.previous.log` from the game folder. Without
   `iphlpapi.dll` the game runs unmodded.
 
 ## Troubleshooting
@@ -58,8 +58,8 @@ removed, delete its folder from `mods`.
 - **A mod doesn't show up or doesn't work:** open `chalchiu.log`. A mod that fails to load is skipped and the error
   is written there, the other mods still load.
 - **Something behaves oddly:** `chalchiu.log` records what you do with the mods: which popups you open and close
-  (and how), which buttons you press, setting changes and saves, hotkeys, and the messages mods show. Each game
-  start begins with a `Loading Chalchiu` line and the game version, and the file keeps earlier sessions, so the
-  most recent one is at the end. Attach it to bug reports.
+  (and how), which buttons you press, setting changes and saves, hotkeys, and the messages mods show. It starts
+  fresh every time the game starts; the session before is in `chalchiu.previous.log`. If you restarted the game
+  after the problem, attach that one too.
 - **The game crashes:** the log ends with the module and offset of the crash. Please
   [open an issue](https://github.com/zreezy/chalchiu-coromon/issues/new) with your game version and `chalchiu.log`.

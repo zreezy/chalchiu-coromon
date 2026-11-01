@@ -67,6 +67,10 @@ local function onResponse(event)
         return
     end
 
+    if not (url and url:match("^https://github%.com/")) then
+        url = RELEASES_URL -- only ever open GitHub
+    end
+
     local latest = tag:gsub("^v", "")
     if _M.isNewer(latest, _M.installed) then
         _M.latest = { version = latest, url = url or RELEASES_URL }

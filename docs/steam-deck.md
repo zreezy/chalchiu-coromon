@@ -58,7 +58,8 @@ settings (`mods/<mod>/settings.lua`) are kept, and so is the launch option.
 
 ## Remove
 
-Delete `iphlpapi.dll`, `mods`, `optional` and `chalchiu.log` from the game folder, and clear the launch option.
+Delete `iphlpapi.dll`, `mods`, `optional`, `chalchiu.log` and `chalchiu.previous.log` from the game folder, and
+clear the launch option.
 
 ## Troubleshooting
 

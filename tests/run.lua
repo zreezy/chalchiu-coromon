@@ -448,6 +448,15 @@ check(chalchiu.hotkeys.isCapturing(), "key capture started")
 press("f7")
 check(trainerConfig.keyAddGold == "f7", "key rebound to f7")
 press("f7"); check(gold == 105000, "rebound key works")
+
+-- No hotkeys while the game's text entry screen is open (typing a name)
+package.preload["classes.interface.overlays.keyboardOverlayBuilder"] = function()
+  return { new = function() return { parent = {}, isVisible = true } end }
+end
+local keyboardOverlay = require("classes.interface.overlays.keyboardOverlayBuilder"):new()
+press("f7"); check(gold == 105000, "hotkeys ignored while typing")
+keyboardOverlay.parent = nil -- closed
+press("f7"); check(gold == 155000, "hotkeys work again after closing the text entry screen")
 check(files["trainer/settings.lua"] and files["trainer/settings.lua"]:find('"f7"'), "settings saved to file")
 
 -- Back from a settings page returns to the list with that mod selected (Esc here, red button below)

@@ -425,6 +425,7 @@ end
 -- hotkeys.capture(function(keyName) end)  -- next key press (nil if Escape), used for rebinding
 
 local hotkey_list = {}
+local blockers = {} -- functions; while one returns true, hotkeys don't fire (key capture still works)
 local capture_callback = nil
 local listening = false
 local CANCEL_KEYS = { escape = true, back = true }
@@ -447,6 +448,13 @@ local function on_key(event)
       log("error", "[hotkeys] Key capture callback failed: " .. tostring(err))
     end
     return true -- the key was meant for us, don't let the game act on it
+  end
+
+  for _, blocker in ipairs(blockers) do
+    local ok, blocked = pcall(blocker)
+    if ok and blocked then
+      return false
+    end
   end
 
   for _, hotkey in ipairs(hotkey_list) do
@@ -493,7 +501,31 @@ chalchiu.hotkeys = {
   isCapturing = function()
     return capture_callback ~= nil
   end,
+  addBlocker = function(fn)
+    insert(blockers, fn)
+  end,
 }
+
+-- Coromon: no hotkeys while the game's text entry screen (naming your character or a Coromon, online
+-- profile name) is on screen, so typing numpad digits there doesn't trigger mods. The overlay is a
+-- display group; once it's closed it has no parent any more, so this can't leave hotkeys switched off.
+do
+  local overlay = nil
+  chalchiu.hooks.add("classes.interface.overlays.keyboardOverlayBuilder", function(module)
+    if type(module) ~= "table" or type(module.new) ~= "function" then
+      return
+    end
+    local original = module.new
+    module.new = function(...)
+      local result = original(...)
+      overlay = result
+      return result
+    end
+  end, "chalchiu")
+  chalchiu.hotkeys.addBlocker(function()
+    return type(overlay) == "table" and overlay.parent ~= nil and overlay.isVisible ~= false
+  end)
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Per-mod environment: hooks/settings/hotkeys that know which mod they belong to

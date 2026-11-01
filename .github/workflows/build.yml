@@ -122,6 +122,8 @@ jobs:
             echo
             echo "When updating, unzip over the old files. Your mod settings (\`mods/<mod>/settings.lua\`) are not in the zip, so they are kept."
             echo
+            echo "**Steam Deck / Linux:** also add the Steam launch option \`WINEDLLOVERRIDES=\"iphlpapi=n,b\" %command%\`. Full guide, all mods and settings: [wiki](https://github.com/${GITHUB_REPOSITORY}/wiki)."
+            echo
             echo "## Changes"
             echo "$changes"
           } > notes.md
