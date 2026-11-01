@@ -18,7 +18,7 @@ Modding support for Solar2D Games
 
 > **Warning**  
 > Please do not report any issues that may've been caused through this project to the official game developers as they will not assist you with broken games / saves when you are using mods.  
-> Please [open an issue here](https://github.com/Curve/chalchiu/issues/new) instead!
+> Please [open an issue here](https://github.com/zreezy/chalchiu-coromon/issues/new) instead!
 
 > **Note**  
 > This is a fork of [Curve/chalchiu](https://github.com/Curve/chalchiu) by Curve, updated to work with Coromon v1.5.4 (2026) and maintained by Zreezy.  
@@ -27,6 +27,8 @@ Modding support for Solar2D Games
 # Introduction
 
 This Project aims to add mod support to [Coromon](https://store.steampowered.com/app/1218210/Coromon/) but is implemented in such a way that it should also work for other Solar2D Games.
+
+The [wiki](https://github.com/zreezy/chalchiu-coromon/wiki) has everything in this README plus the full game reference, in an easier to browse format.
 
 # Usage
 

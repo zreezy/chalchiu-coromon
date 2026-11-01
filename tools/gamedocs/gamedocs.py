@@ -6,6 +6,7 @@ check mods against a version.
   python tools/gamedocs/gamedocs.py generate <resource.car> --version 1.5.4 [--metadata build-metadata.json]
   python tools/gamedocs/gamedocs.py diff 1.5.4 1.6.0
   python tools/gamedocs/gamedocs.py check scripts/coromon --version 1.5.4
+  python tools/gamedocs/gamedocs.py wiki ../chalchiu-coromon.wiki
 
 Output goes to docs/game/<version>/. Only names (modules, functions, parameters, fields, globals)
 and simple default values are written, never game code.
@@ -366,6 +367,12 @@ def write_versions_index():
         "   ```",
         "   python tools/gamedocs/gamedocs.py check scripts/coromon --version <new version>",
         "   ```",
+        "5. Update the GitHub wiki (README pages + this reference) from a clone of the wiki repository:",
+        "   ```",
+        "   git clone https://github.com/<owner>/<repo>.wiki.git ../wiki",
+        "   python tools/gamedocs/gamedocs.py wiki ../wiki",
+        "   cd ../wiki && git add -A && git commit -m \"Update wiki\" && git push",
+        "   ```",
         "",
     ]
     (DOCS / "README.md").write_text("\n".join(lines), encoding="utf-8")
@@ -523,6 +530,11 @@ def main():
     c.add_argument("path", help="folder with mods, e.g. scripts/coromon")
     c.add_argument("--version", required=True)
 
+    w = sub.add_parser("wiki", help="build the GitHub wiki (README pages + docs/game) into a wiki checkout")
+    w.add_argument("out", help="path to a clone of <repo>.wiki.git")
+    w.add_argument("--repo", help="owner/name on GitHub (defaults to the origin remote)")
+    w.add_argument("--branch", default="main", help="branch the wiki links point to (default: main)")
+
     args = parser.parse_args()
     if args.command == "generate":
         generate(args)
@@ -530,6 +542,11 @@ def main():
         diff(args)
     elif args.command == "check":
         sys.exit(check(args))
+    elif args.command == "wiki":
+        from wiki import build
+
+        pages = build(REPO, Path(args.out), args.repo, args.branch)
+        print(f"Wrote {len(pages)} wiki pages to {args.out}")
 
 
 if __name__ == "__main__":
