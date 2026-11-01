@@ -37,7 +37,15 @@ bool hk_corona_init(int param, HWND *hwnd)
     detour_corona_init.reset();
     detour_module_loader.reset();
 
-    chalchiu::lua::init(lua_state);
+    try
+    {
+        chalchiu::lua::init(lua_state);
+    }
+    catch (const std::exception &e)
+    {
+        logger::get()->error("[init] Failed to initialize: {}", e.what());
+    }
+
     return original;
 }
 

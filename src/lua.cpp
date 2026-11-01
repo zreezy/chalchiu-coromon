@@ -19,7 +19,7 @@ namespace chalchiu
 
       public:
         std::vector<std::unique_ptr<mod>> mods;
-        std::multimap<std::string, std::function<void(const sol::object &)>> hooks;
+        std::multimap<std::string, sol::protected_function> hooks;
     };
 
     std::unique_ptr<lua> lua::m_instance;
@@ -85,7 +85,7 @@ namespace chalchiu
         m_impl->state["chalchiu"]["hooks"]["add"] = [this](const std::string &module, const sol::function &callback,
                                                            const sol::optional<std::string> &callee) {
             logger::get()->info("[hooks] '{}' registered hook for '{}'", callee.value_or("<unknown>"), module);
-            m_impl->hooks.emplace(module, callback.as<std::function<void(const sol::object &)>>());
+            m_impl->hooks.emplace(module, sol::protected_function{callback});
         };
 
         //? Setup "mods" function
@@ -161,7 +161,20 @@ namespace chalchiu
 
             for (const auto &[_, hook] : hooks)
             {
-                hook(rtn);
+                try
+                {
+                    auto result = hook(rtn);
+
+                    if (!result.valid())
+                    {
+                        sol::error error = result;
+                        logger::get()->error("[require] A hook for '{}' failed: {}", module, error.what());
+                    }
+                }
+                catch (const std::exception &e)
+                {
+                    logger::get()->error("[require] A hook for '{}' failed: {}", module, e.what());
+                }
             }
 
             return rtn;
@@ -183,7 +196,17 @@ namespace chalchiu
                 continue;
 
             logger::get()->info("[mods] Loading '{}'", path.string());
-            auto mod = mod::load(path, m_impl->state);
+
+            std::unique_ptr<chalchiu::mod> mod;
+
+            try
+            {
+                mod = mod::load(path, m_impl->state);
+            }
+            catch (const std::exception &e)
+            {
+                logger::get()->error("[mods] Error while loading '{}': {}", path.string(), e.what());
+            }
 
             if (!mod)
             {

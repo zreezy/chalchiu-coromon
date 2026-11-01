@@ -1,7 +1,14 @@
 local popup = require("popup")
 
-local abstractOuterTopBarButtonBuilder = globals.require(
+-- This module was removed/renamed in newer game versions. If it is missing, skip the pause menu
+-- button instead of failing the whole mod (the popup on the title screen still works).
+local ok, abstractOuterTopBarButtonBuilder = pcall(globals.require,
   "classes.interface.topBarObjects.abstractOuterTopBarButtonBuilder")
+
+if not ok then
+  print("[mod_info] Pause menu button unavailable on this game version: " .. tostring(abstractOuterTopBarButtonBuilder))
+  return
+end
 
 local function makeButton()
   local parentGroup, modsButton = abstractOuterTopBarButtonBuilder:new(globals.UIContainerStyle.blue)

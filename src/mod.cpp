@@ -105,7 +105,7 @@ namespace chalchiu
             }
 
             logger::get()->debug("[mod] [{}] [require] Loading '{}'", folder_name, target.string());
-            auto result = state.script_file(target.string(), impl->env);
+            auto result = state.script_file(target.string(), impl->env, sol::script_pass_on_error);
 
             if (!result.valid())
             {
@@ -121,13 +121,19 @@ namespace chalchiu
             return rtn;
         };
 
-        auto mod = state.script_file(file.string(), rtn->m_impl->env);
+        auto mod = state.script_file(file.string(), rtn->m_impl->env, sol::script_pass_on_error);
 
         if (!mod.valid())
         {
             auto error = mod.get<sol::error>();
             logger::get()->error("[mod] Failed to load '{}': {}", file.string(), error.what());
 
+            return nullptr;
+        }
+
+        if (mod.get_type() != sol::type::table)
+        {
+            logger::get()->error("[mod] '{}' did not return a table with mod information", file.string());
             return nullptr;
         }
 
