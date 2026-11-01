@@ -3,6 +3,23 @@
 Releases are published automatically when the version in `CMakeLists.txt` changes.
 The section for that version below becomes the release notes.
 
+## [3.3.0] - 2026-11-01
+
+### Area Encounter Info (v1.1)
+- `numPad0` now opens a list of the Coromon in your area: dex number and name, whether you've caught or seen
+  them, and roughly how common they are. Select one to read its dex description.
+- The **Pictures** button opens the game's map popup, like before. The new **View** setting makes the key open
+  the game's popup directly.
+- New **Show undiscovered Coromon** setting (off by default, spoilers): reveals names in the list and pictures
+  instead of silhouettes in the game's popup.
+
+### Coromon Trainer (v1.5)
+- The gold amount, item and item amount settings are now right below the keys they belong to, and are named
+  **Add gold: amount**, **Give item: item** and **Give item: amount**. Saved settings are kept.
+
+### Docs
+- Title screen screenshot showing the **Mods** button in the README and on the Mods page.
+
 ## [3.2.2] - 2026-11-01
 
 ### Mod Info (v1.6)

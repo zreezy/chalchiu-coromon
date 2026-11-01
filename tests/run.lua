@@ -104,14 +104,20 @@ local function findItem(params, field, value)
   end
 end
 
-local locationPopupOpened
+local locationPopupOpened, locationPopupRevealed
 package.preload["classes.interface.overlays.MessageToast"] = function() return MessageToast end
 package.preload["classes.interface.overlays.AbstractSelectPopup"] = function() return AbstractSelectPopup end
 package.preload["classes.interface.navBarObjects.abstractInnerNavBarObjectBuilder"] = function()
   return { new = function() return displayObject() end }
 end
 package.preload["classes.interface.overlays.worldLocationDetailsPopupBuilder"] = function()
-  return { new = function(_, uid) return { open = function() locationPopupOpened = uid end } end }
+  return {
+    new = function(_, uid)
+      -- the game draws silhouettes for Coromon you haven't seen while building the popup
+      locationPopupRevealed = playerStats:hasSeenMonster("cubzero")
+      return { open = function() locationPopupOpened = uid end }
+    end,
+  }
 end
 
 local monsters = {}
@@ -147,6 +153,8 @@ local textHelperModule = {
 local playerStatsModule = {
   addPotentMonsterEncountered = function() return "potent" end,
   addPerfectMonsterEncountered = function() return "perfect" end,
+  hasSeenMonster = function(_, uid) return uid == "swurmy" or uid == "toruga" end,
+  hasOwnedMonster = function(_, uid) return uid == "swurmy" end,
 }
 
 local battleEffectUtilityModule = {
@@ -195,6 +203,20 @@ worldInterface = {
 worldHelper = { isCreated = function() return true end, getWorldLocation = function() return "luxSolisRoute" end }
 worldLocationList = { luxSolisRoute = { mapFilesWithEncounterZones = { "luxSolisRoute" } } }
 pauseMenu = { isCreated = function() return false end }
+local function monsterData(number, name)
+  return {
+    getNumber = function() return number end,
+    getName = function() return name end,
+    getDescription = function() return name .. " description" end,
+  }
+end
+monsterDataList = { swurmy = monsterData(4, "Swurmy"), toruga = monsterData(1, "Toruga"), cubzero = monsterData(30, "Cubzero") }
+EncounterZoneList = {
+  getChanceByMonsterUIDInMapFiles = function(_, files)
+    return files[1] == "luxSolisRoute" and { swurmy = 60, toruga = 39.5, cubzero = 0.5 } or {}
+  end,
+}
+worldLocationUtility = { getLocalised = function(_, uid) return uid == "luxSolisRoute" and "Lux Solis Route" or uid end }
 _G.Battle = Battle
 gameSettings = { getTypeWriterSpeedFactorSetting = function() return 2 end }
 soundHelper = { playSound = function(_, name) sounds[#sounds + 1] = name end }
@@ -318,9 +340,25 @@ check(gold == 55000, "gold amount setting")
 trainerConfig:set("keyNoDamage", "f6"); press("f6")
 check(debugSettings.battle.isNoSkillDamage, "rebound no-damage key")
 
--- Area info (numPad0) opens the game's popup for the current location
+-- Area info (numPad0): list with names, shares and status; button opens the game's popup
+local before = #popups
 press("numPad0")
-check(locationPopupOpened == "luxSolisRoute", "area info popup for current location")
+local area = popups[#popups]
+check(#popups == before + 1 and area.title == "Lux Solis Route", "area info list for current location")
+check(area.items[1].name == "Toruga" and area.items[2].name == "Swurmy" and area.items[3].name == "Cubzero", "sorted by dex number")
+check(area.items[2].owned and area.items[1].seen and not area.items[3].seen, "seen / caught status")
+check(math.floor(area.items[2].share + 0.5) == 60, "share of encounters")
+check(area.onStart and area.onBack and area.cancelButton and not area.cancellable, "area list closes like Mod Info")
+area.onPress(area.items[1], function(onClose) if onClose then onClose() end end)
+check(locationPopupOpened == "luxSolisRoute" and not locationPopupRevealed, "pictures button opens the game popup with silhouettes")
+local areaConfig = chalchiu.settings.get("area_info")
+areaConfig:set("showUndiscovered", true)
+areaConfig:set("view", "game")
+locationPopupOpened = nil
+press("numPad0")
+check(locationPopupOpened == "luxSolisRoute" and locationPopupRevealed, "game view, undiscovered revealed")
+check(not playerStats:hasSeenMonster("cubzero"), "hasSeenMonster restored afterwards")
+areaConfig:set("view", "list")
 
 -- XP & Gold Boost
 check(battleEffectUtility:mutateXpEarned(nil, false, 10, 100) == 200, "2x XP")
@@ -414,7 +452,7 @@ local function logged(pattern)
   end
 end
 check(logged("%[mod_info%] %[ui%] Opening 'Loaded Mods' %(startup%)"), "log: list opened on startup")
-check(logged("%[ui%] Coromon Trainer Settings: pressed 'Next' on 'Items per press"), "log: button press")
+check(logged("%[ui%] Coromon Trainer Settings: pressed 'Next' on 'Give item: amount"), "log: button press")
 check(logged("closed with a Start key"), "log: Esc")
 check(logged("Mod Info Settings: red button"), "log: red button")
 check(logged("%[settings%] 'trainer' keyAddGold: \"numPad4\" %-> \"f7\""), "log: setting change")

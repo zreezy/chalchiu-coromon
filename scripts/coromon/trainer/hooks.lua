@@ -98,6 +98,7 @@ local function key(id, label, default)
   return { key = id, label = label, type = "key", default = default }
 end
 
+-- Order is the order on the settings page: each key is followed by the settings it uses
 local config = settings.define({
   key("keySpeedUp", "Key: Increase game speed", "numPad+"),
   key("keySpeedDown", "Key: Decrease game speed", "numPad-"),
@@ -107,24 +108,26 @@ local config = settings.define({
   key("keySkipWild", "Key: Skip wild battles", "numPad2"),
   key("keyMaxSquad", "Key: Max out squad", "numPad3"),
   key("keyAddGold", "Key: Add gold", "numPad4"),
+  {
+    key = "goldAmount", label = "Add gold: amount", type = "choice", default = 5000,
+    options = { 1000, 5000, 10000, 50000 },
+    description = "How much gold the 'Add gold' key adds.",
+  },
   key("keySkipTrainer", "Key: Skip trainer battles", "numPad5"),
   key("keyNoEnergyCost", "Key: No energy cost", "numPad6"),
   key("keyFastIntros", "Key: Fast battle intros", "numPad7"),
   key("keyHideUI", "Key: Hide world interface", "numPad8"),
   key("keyGiveItem", "Key: Give item", "numPad9"),
-  key("keyNoDamage", "Key: No move damage", ""),
   {
-    key = "goldAmount", label = "Gold per press", type = "choice", default = 5000,
-    options = { 1000, 5000, 10000, 50000 },
-  },
-  {
-    key = "item", label = "Item to give", type = "choice", default = "SPINNER_REGULAR_4", options = ITEMS,
+    key = "item", label = "Give item: item", type = "choice", default = "SPINNER_REGULAR_4", options = ITEMS,
     description = "The item the 'Give item' key adds to your inventory.",
   },
   {
-    key = "itemAmount", label = "Items per press", type = "choice", default = 10,
+    key = "itemAmount", label = "Give item: amount", type = "choice", default = 10,
     options = { 1, 5, 10, 25, 99 },
+    description = "How many of the item the 'Give item' key adds.",
   },
+  key("keyNoDamage", "Key: No move damage", ""),
 })
 
 ---------------------------------------------------------------------------------------------------

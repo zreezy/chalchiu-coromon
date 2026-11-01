@@ -9,9 +9,11 @@ The mods were originally written for Coromon v1.1.2 and have been updated for v1
 | [Potent Alert](#potent-alert) | Notification and sound when a potent or perfect Coromon appears | |
 | [XP & Gold Boost](#xp--gold-boost) | Multiplies battle XP (2x) and trainer gold | |
 | [Text Speed+](#text-speed) | Dialogue text faster than the game's 3x maximum (6x) | |
-| [Area Encounter Info](#area-encounter-info) | Shows which Coromon live in your current area | `numPad0` |
+| [Area Encounter Info](#area-encounter-info) | Lists the Coromon in your current area, how common they are and which you've seen | `numPad0` |
 
 ## Changing settings
+
+![The Mods button in the top right of the title screen](../assets/title_screen_mods_button.jpg)
 
 Every mod's settings, including all hotkeys, can be changed in-game:
 
@@ -66,8 +68,8 @@ can't be turned on during one.
 | `numPad9` | Give item |
 | Not set | No move damage (affects everyone in the battle) |
 
-Settings: every key above, **Gold per press** (5000 by default), **Item to give** (Spinner by default) and
-**Items per press** (10 by default).
+Settings: every key above. **Add gold: amount** (5000 by default) comes right after the Add gold key, and
+**Give item: item** (Spinner by default) and **Give item: amount** (10 by default) right after the Give item key.
 
 ## Potent Alert
 
@@ -89,10 +91,21 @@ Settings: **Text speed**: use the game's setting, 4x, 6x (default), 10x or 25x.
 
 ## Area Encounter Info
 
-Press `numPad0` in the overworld to see which Coromon live in your current area, their chances and which ones you've
-seen, in the game's own world map popup. Doesn't work during battles.
+Press `numPad0` in the overworld to list the Coromon that live in your current area. Each row shows:
 
-Settings: **Key: Show area encounters** (`numPad0` by default).
+- the dex number and name (`???` for Coromon you haven't seen yet),
+- **Caught**, **Seen** or **Not seen**,
+- roughly how common it is, as a share of the area's encounters (e.g. `~12%`). The game adds up the encounter
+  weights of every zone in the area (grass, water, ...), so this is approximate.
+
+Select a row to read its dex description. The blue **Pictures** button opens the game's own world map popup for the
+area. Doesn't work during battles, or when your save randomizes every encounter.
+
+| Setting | Default |
+|---|---|
+| Key: Show area encounters | `numPad0` |
+| View: **List with names** or **Game's map popup** (what the key opens) | List with names |
+| Show undiscovered Coromon: reveal names in the list and pictures in the game's popup (spoilers) | Off |
 
 ## Optional: debug
 

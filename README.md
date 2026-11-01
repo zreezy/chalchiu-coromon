@@ -45,6 +45,8 @@ To **update**, unzip a new release over the old files. Your mod settings are kep
 
 # Mods
 
+![The Mods button in the top right of the title screen](assets/title_screen_mods_button.jpg)
+
 | Mod | What it does |
 |---|---|
 | **Mod Info** | Lists the installed mods and lets you change their settings in-game (title screen **Mods** button) |
@@ -52,7 +54,7 @@ To **update**, unzip a new release over the old files. Your mod settings are kep
 | **Potent Alert** | Notification and sound when a potent or perfect Coromon appears |
 | **XP & Gold Boost** | Multiplies battle XP (2x by default) and trainer gold. No effect online |
 | **Text Speed+** | Dialogue text faster than the game's 3x maximum (6x by default) |
-| **Area Encounter Info** | Press `numPad0` to see which Coromon live in your current area |
+| **Area Encounter Info** | Press `numPad0` to list the Coromon in your current area, how common they are and which you've seen |
 
 Every setting and hotkey can be changed in-game: **Mods** → select a mod → **Settings**. Changes save automatically.
 Default keys, settings and screenshots: [Mods](https://github.com/zreezy/chalchiu-coromon/wiki/Mods).
