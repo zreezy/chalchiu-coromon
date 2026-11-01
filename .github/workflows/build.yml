@@ -52,7 +52,8 @@ jobs:
           path: package/
 
   release:
-    # Every successful build of master becomes a GitHub release with a ready-to-install zip
+    # Publishes a release only when the version in CMakeLists.txt changes (tag v<version>).
+    # Other pushes still build and upload the "chalchiu" artifact, but don't add a release.
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-24.04
@@ -63,39 +64,65 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -n 's/^project(.*VERSION \([0-9.]*\)).*/\1/p' CMakeLists.txt)
+          tag="v${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "Release ${tag} already exists, nothing to publish. Bump VERSION in CMakeLists.txt to release."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Download Artifact
+        if: steps.version.outputs.publish == 'true'
         uses: actions/download-artifact@v4
         with:
           name: chalchiu
           path: package/
 
       - name: Create Release
+        if: steps.version.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          version=$(sed -n 's/^project(.*VERSION \([0-9.]*\)).*/\1/p' CMakeLists.txt)
-          tag="v${version}-build.${GITHUB_RUN_NUMBER}"
-          short_sha=$(git rev-parse --short HEAD)
+          (cd package && zip -qr "../chalchiu-${TAG}.zip" .)
 
-          (cd package && zip -qr "../chalchiu-${tag}.zip" .)
+          # Release notes: the matching "## [x.y.z]" section of CHANGELOG.md
+          changes=$(awk -v v="$VERSION" '
+            /^## \[/ { found = index($0, "[" v "]") > 0; next }
+            found { print }
+          ' CHANGELOG.md)
+
+          if [ -z "$changes" ]; then
+            changes=$(git log -1 --format='%s%n%n%b')
+          fi
 
           {
-            echo "Automatic build of \`${short_sha}\` from master."
-            echo
             echo "## Install"
             echo
             echo "1. Back up your Coromon saves."
             echo "2. Unzip into the game folder (e.g. \`C:\\Program Files (x86)\\Steam\\steamapps\\common\\Coromon\`), next to \`coromon.exe\`."
             echo "3. Mods go in \`mods/\`. The \`optional/\` folder has extra mods (e.g. \`debug\`) you can copy into \`mods/\` if you want them."
-            echo "4. Start the game. A \`chalchiu.log\` file is created, and the window title shows how many mods loaded."
+            echo "4. Start the game. A \`chalchiu.log\` file is created, and the window title shows the chalchiu version and how many mods loaded."
+            echo
+            echo "When updating, replace the mod folders instead of unzipping over them, so removed files don't linger."
             echo
             echo "## Changes"
-            echo
-            git log -1 --format='%s%n%n%b'
+            echo "$changes"
           } > notes.md
 
-          gh release create "$tag" "chalchiu-${tag}.zip" \
+          gh release create "$TAG" "chalchiu-${TAG}.zip" \
             --target "$GITHUB_SHA" \
-            --title "chalchiu ${version} (build ${GITHUB_RUN_NUMBER})" \
+            --title "chalchiu ${VERSION}" \
             --notes-file notes.md \
             --latest

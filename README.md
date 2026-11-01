@@ -211,3 +211,11 @@ local math = globals.require("math") -- This will load the same math as used by 
 
 </p>
 </details>
+# Releasing
+
+Every push builds chalchiu on GitHub Actions (the zip is attached to the run as the `chalchiu` artifact).
+A GitHub release is only published when the version changes:
+
+1. Bump `VERSION` in the `project(...)` line of [`CMakeLists.txt`](CMakeLists.txt) (e.g. `3.0.0` to `3.0.1`).
+2. Add a `## [3.0.1] - <date>` section to [`CHANGELOG.md`](CHANGELOG.md); it becomes the release notes.
+3. Push to `master`. The release `v3.0.1` is created with a ready-to-install zip.
