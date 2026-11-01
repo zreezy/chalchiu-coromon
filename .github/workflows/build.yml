@@ -59,7 +59,7 @@ jobs:
   release:
     # Publishes a release only when the version in CMakeLists.txt changes (tag v<version>).
     # Other pushes still build and upload the "chalchiu" artifact, but don't add a release.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-24.04
     permissions:
