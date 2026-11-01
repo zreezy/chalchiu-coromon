@@ -44,6 +44,8 @@ and if it's newer than yours you get a message on the title screen and an **Upda
 the mod list. Its **Download** button opens the release page in your browser. Nothing else is sent, and you can turn
 this off with **Check for updates**.
 
+<img src="../assets/mod_info_update.jpg" alt="Loaded Mods list with an Update available row" width="420">
+
 <img src="../assets/settings_mod_info.jpg" alt="Mod Info settings" width="420">
 
 | Setting | Default |
