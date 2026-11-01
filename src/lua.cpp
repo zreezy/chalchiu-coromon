@@ -26,7 +26,7 @@ namespace chalchiu
 
     lua::lua(lua_State *state)
     {
-        logger::get()->info("[lua] Setting up state with 0x{}", reinterpret_cast<std::uintptr_t>(state));
+        logger::get()->info("[lua] Setting up state with 0x{:X}", reinterpret_cast<std::uintptr_t>(state));
         m_impl = std::make_unique<impl>(impl{.state = state});
 
         logger::get()->info("[lua] Memory used: {}", m_impl->state.memory_used());

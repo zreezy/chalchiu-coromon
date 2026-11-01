@@ -52,9 +52,33 @@ target_include_directories(${PROJECT_NAME} PRIVATE "include/chalchiu" "private")
 
 include("cmake/cpm.cmake")
 
-find_package(Lua REQUIRED)
+# --------------------------------------------------------------------------------------------------------
+# Lua: link against the game's own lua.dll
+# --------------------------------------------------------------------------------------------------------
+# Solar2D ships a modified Lua 5.1 whose internal structs differ from stock Lua (since late 2023).
+# Linking a stock Lua statically would make chalchiu operate on the game's lua_State with the wrong
+# layout and crash. Instead we generate an import library from the exports of the game's lua.dll,
+# so every Lua call goes through the exact same Lua the game uses.
 
-CPMAddPackage("gh:ThePhD/sol2@3.3.0")
+find_program(CHALCHIU_DLLTOOL NAMES ${CHALCHIU_TOOLCHAIN_PREFIX}dlltool llvm-dlltool dlltool REQUIRED)
+
+set(lua_def    "${CMAKE_CURRENT_SOURCE_DIR}/third_party/lua/lua.def")
+set(lua_implib "${CMAKE_CURRENT_BINARY_DIR}/liblua.dll.a")
+
+add_custom_command(
+    OUTPUT  ${lua_implib}
+    COMMAND ${CHALCHIU_DLLTOOL} -m i386 -d ${lua_def} -l ${lua_implib}
+    DEPENDS ${lua_def}
+    COMMENT "Generating import library for the game's lua.dll"
+)
+
+add_custom_target(lua_implib DEPENDS ${lua_implib})
+add_dependencies(${PROJECT_NAME} lua_implib)
+
+set(LUA_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/lua/include")
+set(LUA_LIBRARIES   ${lua_implib})
+
+CPMAddPackage("gh:ThePhD/sol2@3.5.0")
 CPMAddPackage("gh:curve/lime#0a5f62f")
 CPMAddPackage("gh:gabime/spdlog@1.11.0")
 

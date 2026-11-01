@@ -4,35 +4,44 @@ on:
     branches: ["**"]
     paths-ignore:
       - "**/*.md"
-      - "**/*.yml"
   pull_request:
     branches: ["**"]
 
 name: Build
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container: greyltc/archlinux-aur:paru
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["cpp"]
+    runs-on: ubuntu-24.04
+    env:
+      LLVM_MINGW: llvm-mingw-20241217-ucrt-ubuntu-20.04-x86_64
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install build dependencies
-        run: "pacman --noconfirm -Syu base-devel cmake gcc git make mingw-w64 && aur-install mingw-w64-lua51"
+      - name: Install llvm-mingw
+        run: |
+          curl -sSL -o llvm-mingw.tar.xz "https://github.com/mstorsjo/llvm-mingw/releases/download/20241217/${LLVM_MINGW}.tar.xz"
+          mkdir -p "$RUNNER_TEMP/llvm-mingw"
+          tar -xf llvm-mingw.tar.xz -C "$RUNNER_TEMP/llvm-mingw" --strip-components=1
+          echo "$RUNNER_TEMP/llvm-mingw/bin" >> "$GITHUB_PATH"
 
       - name: Compile
-        run: "mkdir build && cd build && cmake .. -DIS_CI=1 -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain.cmake && cmake --build . --config Release"
+        run: |
+          cmake -S . -B build -DIS_CI=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake
+          cmake --build build --config Release -j
+
+      - name: Check imports
+        run: i686-w64-mingw32-objdump -p build/iphlpapi.dll | grep "DLL Name"
+
+      - name: Package
+        run: |
+          mkdir -p package/mods package/optional
+          cp build/iphlpapi.dll package/
+          cp -r scripts/coromon/* package/mods/
+          cp -r scripts/debug package/optional/
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: build
-          path: |
-            build/
-            !build/cmake
-            !build/_deps
+          name: chalchiu
+          path: package/
