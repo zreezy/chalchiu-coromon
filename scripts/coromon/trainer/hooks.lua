@@ -1,17 +1,13 @@
 -- Coromon Trainer, updated for Coromon v1.5.4 (see docs/game/1.5.4 for the game modules used here)
 
-local battleDialogOverlayBuilder = globals.require("classes.interface.dialog.battleDialogOverlayBuilder")
+-- MessageToast is the game's own small notification that hides itself. Unlike dialogs it never takes
+-- over input, so it is safe to show from a key press anywhere (world, menus, battles).
+local MessageToast = globals.require("classes.interface.overlays.MessageToast")
 
 local _M = {}
 
-local function message(...)
-  local text = { ... }
-
-  local dialog = battleDialogOverlayBuilder:new(true)
-
-  for _, v in ipairs(text) do
-    dialog:addText(v)
-  end
+local function message(text, intent)
+  MessageToast:showAndHide(text, { intent = intent or "info" })
 end
 
 -- debugSettings was split into sections (game, battle, coromon1, ...) in newer game versions
@@ -72,30 +68,23 @@ _M.mods = {
     message("Skip Battles: " .. onOff(skipWildBattles.toggle()))
   end
   },
-  { "numPad3", "Max Out Coromon", function()
-    -- Sometimes noclip can cause issues with interactive dialogues
-    globals.debugSettings.game.noClipMode = false
+  { "numPad3", "Max Out Squad", function()
+    local count = 0
 
-    local dialog = battleDialogOverlayBuilder:new(false)
-    local squad = globals.playerMonsters:getSquad()
-
-    for _, v in ipairs(squad) do
-      dialog:addText("Would you like to max out " .. v:getDisplayName() .. "?")
-      dialog:addQuestion({ { yes = "Yes" }, { no = "No" } }, function(answer)
-        if answer == "yes" then
-          dialog:addText("Maxing out " .. v:getDisplayName())
-          v:tryIncreaseLevel(100)
-          v:setPotential(21)
-          v:setHealthToMaxHealth()
-          v:setEnergyToMaxOverchargedEnergy()
-        end
-      end)
+    for _, v in ipairs(globals.playerMonsters:getSquad()) do
+      v:tryIncreaseLevel(100)
+      v:setPotential(21)
+      v:setHealthToMaxHealth()
+      v:setEnergyToMaxOverchargedEnergy()
+      count = count + 1
     end
+
+    message("Maxed out " .. count .. " Coromon", "success")
   end
   },
   { "numPad4", "Add 5000 Gold", function()
-    message("Adding Gold")
     globals.playerCurrency:addGold(5000)
+    message("Added 5000 Gold", "success")
   end
   },
 }
@@ -120,6 +109,7 @@ hooks.add("classes.interface.screens.titleScreen", function(module)
             local ok, err = pcall(v[3])
             if not ok then
               print("[trainer] '" .. v[2] .. "' failed: " .. tostring(err))
+              pcall(message, v[2] .. " failed", "warning")
             end
           end
         end
