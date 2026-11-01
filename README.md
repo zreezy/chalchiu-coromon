@@ -20,6 +20,9 @@ Modding support for Solar2D Games
 > Please do not report any issues that may've been caused through this project to the official game developers as they will not assist you with broken games / saves when you are using mods.  
 > Please [open an issue here](https://github.com/Curve/chalchiu/issues/new) instead!
 
+> **Note**  
+> This is a fork of [Curve/chalchiu](https://github.com/Curve/chalchiu), updated to work with Coromon v1.5.4 (2026).
+
 # Introduction
 
 This Project aims to add mod support to [Coromon](https://store.steampowered.com/app/1218210/Coromon/) but is implemented in such a way that it should also work for other Solar2D Games.
@@ -31,7 +34,7 @@ The installation of chalchiu is fairly simple:
 * Locate your Game Folder
   > e.g. `C:/GOG Games/Coromon/`
 
-* Download the zip file from the latest [Release](https://github.com/Curve/chalchiu/releases) and unpack all files into the game directory
+* Download the zip file from the latest [Release](https://github.com/zreezy/chalchiu-coromon/releases/latest) and unpack all files into the game directory
   * Your Game Folder should now roughly look like this
     > Please note that some files have been omitted
     ```
@@ -57,7 +60,7 @@ The installation of chalchiu is fairly simple:
 
 Here you'll find information about the provided Coromon mods!  
 
-All mods are tested with the latest game version <sub><sup>(v1.1.2 at the time of writing)</sup></sub>, don't let that stop you from trying them on other game versions though!
+The mods were originally written for v1.1.2. This fork updates the loader for v1.5.4 (Solar2D 2026.3729); the individual mods are still being updated, so some may not work yet.
 
 ## Available Mods
 

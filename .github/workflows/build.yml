@@ -45,3 +45,52 @@ jobs:
         with:
           name: chalchiu
           path: package/
+
+  release:
+    # Every successful build of master becomes a GitHub release with a ready-to-install zip
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: chalchiu
+          path: package/
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -n 's/^project(.*VERSION \([0-9.]*\)).*/\1/p' CMakeLists.txt)
+          tag="v${version}-build.${GITHUB_RUN_NUMBER}"
+          short_sha=$(git rev-parse --short HEAD)
+
+          (cd package && zip -qr "../chalchiu-${tag}.zip" .)
+
+          {
+            echo "Automatic build of \`${short_sha}\` from master."
+            echo
+            echo "## Install"
+            echo
+            echo "1. Back up your Coromon saves."
+            echo "2. Unzip into the game folder (e.g. \`C:\\Program Files (x86)\\Steam\\steamapps\\common\\Coromon\`), next to \`coromon.exe\`."
+            echo "3. Mods go in \`mods/\`. The \`optional/\` folder has extra mods (e.g. \`debug\`) you can copy into \`mods/\` if you want them."
+            echo "4. Start the game. A \`chalchiu.log\` file is created, and the window title shows how many mods loaded."
+            echo
+            echo "## Changes"
+            echo
+            git log -1 --format='%s%n%n%b'
+          } > notes.md
+
+          gh release create "$tag" "chalchiu-${tag}.zip" \
+            --target "$GITHUB_SHA" \
+            --title "chalchiu ${version} (build ${GITHUB_RUN_NUMBER})" \
+            --notes-file notes.md \
+            --latest
