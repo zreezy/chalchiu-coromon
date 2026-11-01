@@ -1,4 +1,4 @@
--- Mod Info settings (change them in-game: Loaded Mods > Mod Info > check button)
+-- Mod Info settings (change them in-game: Loaded Mods > Mod Info > Settings)
 return settings.define({
   {
     key = "showOnStartup",

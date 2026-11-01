@@ -15,7 +15,7 @@ local function addModsButton(screen)
     globals.magnet:topRight(button, 6, 6) -- no parent: relative to the visible screen
 
     local label = globals.textHelper:spawnPrepared(button, text)
-    globals.magnet:center(label, 0, -1, button)
+    globals.magnet:center(label, 0, -3, button) -- the button has a bottom lip, centre on its face
 
     globals.inputHelper:addMouseHoverable(button, globals.UIButton:showHoverVariantOnHover())
     globals.inputHelper:addTouchable(button,

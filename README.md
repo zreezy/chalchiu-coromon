@@ -76,8 +76,10 @@ The mods were originally written for v1.1.2 and have been updated for v1.5.4 (So
 ## Available Mods
 
 Every mod's settings (including all hotkeys) can be changed in-game: open the **Loaded Mods** popup
-(shown on startup, or with the info button next to your gold in the pause menu), select a mod and press
-the check button. Settings are saved to `mods/<mod>/settings.lua`.
+(shown on startup, with the **Mods** button on the title screen, or with the info button next to your gold
+in the pause menu), select a mod and press **Settings**. On a settings page the blue button changes the
+selected setting (its label says what it does, e.g. **Turn on**, **Next** or **Set key**) and the red button
+(or `Esc`) goes back. Changes are saved right away to `mods/<mod>/settings.lua`, there is no save button.
 
 - **Mod Info**
   > Shows the loaded mods on startup and from the pause menu, and lets you change each mod's settings.

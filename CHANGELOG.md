@@ -3,6 +3,17 @@
 Releases are published automatically when the version in `CMakeLists.txt` changes.
 The section for that version below becomes the release notes.
 
+## [3.2.1] - 2026-11-01
+
+### Mod Info (v1.5)
+- Clearer settings pages. The blue button now says what it does for the selected row
+  (**Settings**, **Turn on** / **Turn off**, **Next**, **Set key**) instead of showing a checkmark.
+- New red button to close the mod list, or to go back from a settings page to the list (`Esc` still
+  works). Going back keeps the mod you came from selected.
+- Settings pages say that changes are saved automatically, and choice settings list every option
+  with the current one in brackets.
+- The **Mods** button text on the title screen is centred properly.
+
 ## [3.2.0] - 2026-11-01
 
 ### Mod Info (v1.4)

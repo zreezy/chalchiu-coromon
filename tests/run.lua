@@ -67,8 +67,11 @@ local AbstractSelectPopup = {
     local params = { title = title, items = items, render = render }
     function params:setGetDescriptionFunction(fn) self.describe = fn end
     function params:setConvertToCategoryFunction() end
-    function params:setConfirmButton(content, onPress) self.content, self.onPress = content, onPress end
-    function params:setCancellable() end
+    function params:setConfirmButton(content, onPress, recreate)
+      self.content, self.onPress, self.recreate = content, onPress, recreate
+    end
+    function params:setCancellable(onCancel) self.onCancel = onCancel end
+    function params:setCancellableByButton(onCancel) self.cancelButton = onCancel end
     function params:setIsSelectedObjectFunction(fn) self.isSelected = fn end
     return params
   end,
@@ -340,11 +343,30 @@ onlineBattle = false
 require("classes.interface.screens.SquadScreen"):new()
 check(topBarObjects[1] == "right", "pause menu button added to the right of the top bar")
 
+-- Text the blue button shows for the given row
+local function buttonLabel(params, index)
+  local shown
+  local saved = textHelperModule.newPrepared
+  textHelperModule.newPrepared = function(self, font, options)
+    shown = options.text
+    return saved(self, font, options)
+  end
+  params.content(displayObject(), displayObject(), params.items[index])
+  textHelperModule.newPrepared = saved
+  return shown
+end
+
 -- Mod Info settings page: open trainer settings, cycle a choice, rebind a key
 local list = popups[2]
+check(list.cancelButton and list.onCancel and list.recreate, "mod list has a close button and per-row button labels")
+check(buttonLabel(list, findItem(list, "name", "Coromon Trainer")) == "Settings", "button says Settings for mods with settings")
+check(buttonLabel(list, findItem(list, "name", "Text Speed+")) == "Settings", "Text Speed+ has settings")
 confirm(list, findItem(list, "name", "Coromon Trainer"))
 local page = popups[#popups]
 check(page.title == "Coromon Trainer Settings", "trainer settings page opens")
+check(page.cancelButton, "settings page has a back button")
+check(buttonLabel(page, findItem(page, "key", "itemAmount")) == "Next", "choice button says Next")
+check(buttonLabel(page, findItem(page, "key", "keyAddGold")) == "Set key", "key button says Set key")
 confirm(page, findItem(page, "key", "itemAmount"))
 check(trainerConfig.itemAmount == 25, "choice cycles 10 -> 25, got " .. tostring(trainerConfig.itemAmount))
 page = popups[#popups]
@@ -355,6 +377,25 @@ press("f7")
 check(trainerConfig.keyAddGold == "f7", "key rebound to f7")
 press("f7"); check(gold == 105000, "rebound key works")
 check(files["trainer/settings.lua"] and files["trainer/settings.lua"]:find('"f7"'), "settings saved to file")
+
+-- Back from a settings page returns to the list with that mod selected
+local before = #popups
+popups[#popups].cancelButton()
+local back = popups[#popups]
+check(#popups == before + 1 and back.title == "Loaded Mods", "back button returns to the mod list")
+check(back.isSelected and back.isSelected(back.items[findItem(back, "name", "Coromon Trainer")]), "returning keeps the mod selected")
+
+-- Boolean settings: the button says what pressing it will do
+local modInfoIndex = findItem(back, "name", "Mod Info")
+confirm(back, modInfoIndex)
+local modInfoPage = popups[#popups]
+local startupIndex = findItem(modInfoPage, "key", "showOnStartup")
+local wasOn = chalchiu.settings.get("mod_info"):get("showOnStartup")
+check(buttonLabel(modInfoPage, startupIndex) == (wasOn and "Turn off" or "Turn on"), "boolean button label")
+confirm(modInfoPage, startupIndex)
+check(chalchiu.settings.get("mod_info"):get("showOnStartup") == not wasOn, "boolean toggled")
+modInfoPage = popups[#popups]
+check(buttonLabel(modInfoPage, startupIndex) == (wasOn and "Turn on" or "Turn off"), "label follows the new value")
 
 -- No errors logged anywhere
 for _, entry in ipairs(logs) do
