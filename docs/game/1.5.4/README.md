@@ -266,7 +266,7 @@ Data entries (not documented individually): Build configuration: 21, Font glyph 
 | [classes.modules.mte.mapLoaders](packages/classes.modules.mte.mapLoaders.md) | 2 |
 | [classes.modules.navigation](packages/classes.modules.navigation.md) | 12 |
 | [classes.modules.pluginWrappers](packages/classes.modules.pluginWrappers.md) | 1 |
-| [classes.modules.saveslotData](packages/classes.modules.saveslotData.md) | 7 |
+| [classes.modules.saveslotData](packages/classes.modules.SaveslotData.md) | 7 |
 | [classes.modules.saveslotData.Coromon1SaveslotModule](packages/classes.modules.saveslotData.Coromon1SaveslotModule.md) | 1 |
 | [classes.modules.saveslotData.CoromonHybridSaveslotModule](packages/classes.modules.saveslotData.CoromonHybridSaveslotModule.md) | 1 |
 | [classes.modules.saveslotData.CoromonRoguePlanetSaveslotModule](packages/classes.modules.saveslotData.CoromonRoguePlanetSaveslotModule.md) | 1 |

@@ -52,6 +52,15 @@ def anchor(text: str) -> str:
     return re.sub(r"[^a-z0-9 _-]", "", text.lower()).replace(" ", "-")
 
 
+def package_pages(packages) -> dict[str, str]:
+    """Page (file) name per package; packages that only differ in case share the first one's page."""
+    first: dict[str, str] = {}
+    pages = {}
+    for package in sorted(packages):
+        pages[package] = first.setdefault(package.lower(), package)
+    return pages
+
+
 def signature(name: str, params: list[str]) -> str:
     return f"{name}({', '.join(params)})"
 
@@ -240,13 +249,21 @@ def generate(args):
     for name in modules:
         packages[package_of(name)].append(name)
 
-    # Package pages
-    for package, names in sorted(packages.items()):
-        lines = [f"# {package}", "", f"Coromon {version}. {len(names)} module(s). [Back to index](../README.md)", ""]
+    # Package pages. Packages whose names only differ in case (e.g. "SaveslotData" and "saveslotData")
+    # share one page: Windows and GitHub wikis treat file names case-insensitively.
+    page_of = package_pages(packages)
+    groups: dict[str, list[str]] = defaultdict(list)
+    for package in sorted(packages):
+        groups[page_of[package]].append(package)
+
+    for page, group in sorted(groups.items()):
+        names = [n for package in group for n in packages[package]]
+        lines = [f"# {' / '.join(group)}", "",
+                 f"Coromon {version}. {len(names)} module(s). [Back to index](../README.md)", ""]
         lines += [", ".join(f"[{short_name(n)}](#{anchor(short_name(n))})" for n in names), ""]
         for name in names:
             lines += render_module(name, modules[name], version)
-        (out / "packages" / f"{package}.md").write_text("\n".join(lines), encoding="utf-8")
+        (out / "packages" / f"{page}.md").write_text("\n".join(lines), encoding="utf-8")
 
     # Globals page
     g_lines = [
@@ -313,7 +330,7 @@ def generate(args):
         "|---|---|",
     ]
     for package, names in sorted(packages.items()):
-        lines.append(f"| [{package}](packages/{package}.md) | {len(names)} |")
+        lines.append(f"| [{package}](packages/{page_of[package]}.md) | {len(names)} |")
     if api["errors"]:
         lines += ["", "## Modules that could not be analysed", ""]
         lines += [f"- `{k}`: {v}" for k, v in api["errors"].items()]

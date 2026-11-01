@@ -87,6 +87,13 @@ class Wiki:
     # ---------------------------------------------------------------------------------------------
 
     def write(self, out: Path):
+        # Windows and GitHub wikis treat page names case-insensitively, so they must be unique that way
+        seen: dict[str, str] = {}
+        for page in self.pages:
+            other = seen.setdefault(page.lower(), page)
+            if other != page:
+                raise SystemExit(f"Wiki pages '{other}' and '{page}' only differ in case")
+
         out.mkdir(parents=True, exist_ok=True)
         # Remove pages from a previous run, keep the wiki's git metadata
         for old in out.glob("*.md"):
