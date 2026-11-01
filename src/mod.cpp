@@ -82,7 +82,8 @@ namespace chalchiu
         };
 
         //? Overwrite "require" so that we can properly load files in the same mod folder
-        static std::map<fs::path, sol::object> loaded;
+        //? Leaked on purpose (see lua::init): must not release Lua references at process exit
+        static auto &loaded = *new std::map<fs::path, sol::object>;
 
         rtn->m_impl->env["require"] = [=, impl = rtn->m_impl.get()](const std::string &name) mutable {
             const auto mod_folder = fs::absolute(file.parent_path());

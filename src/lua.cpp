@@ -19,10 +19,9 @@ namespace chalchiu
 
       public:
         std::vector<std::unique_ptr<mod>> mods;
-        std::multimap<std::string, sol::protected_function> hooks;
     };
 
-    std::unique_ptr<lua> lua::m_instance;
+    lua *lua::m_instance = nullptr;
 
     lua::lua(lua_State *state)
     {
@@ -59,6 +58,20 @@ namespace chalchiu
 
     lua::~lua() = default;
 
+    namespace
+    {
+        lua_CFunction previous_panic = nullptr;
+
+        int panic(lua_State *state)
+        {
+            const auto *message = lua_tostring(state, -1);
+            logger::get()->error("[panic] Panic: '{}'", message ? message : "<unknown>");
+
+            //? Hand over to the game's own panic handler so behaviour stays the same
+            return previous_panic ? previous_panic(state) : 0;
+        }
+    } // namespace
+
     void lua::setup_handlers()
     {
         using exception_t = sol::optional<const std::exception &>;
@@ -69,23 +82,23 @@ namespace chalchiu
             return sol::stack::push(state, description);
         });
 
-        auto panic = [](const sol::optional<std::string> &message) {
-            logger::get()->error("[panic] Panic: '{}'", message.value_or("<unknown>"));
-        };
-
-        m_impl->state.set_panic(sol::c_call<decltype(panic), panic>);
+        previous_panic = lua_atpanic(m_impl->state.lua_state(), panic);
     }
 
     void lua::setup_state()
     {
         m_impl->state["chalchiu"] = m_impl->state.create_table();
 
-        //? Setup "hooks" table
-        m_impl->state["chalchiu"]["hooks"] = m_impl->state.create_table();
-        m_impl->state["chalchiu"]["hooks"]["add"] = [this](const std::string &module, const sol::function &callback,
-                                                           const sol::optional<std::string> &callee) {
-            logger::get()->info("[hooks] '{}' registered hook for '{}'", callee.value_or("<unknown>"), module);
-            m_impl->hooks.emplace(module, sol::protected_function{callback});
+        //? Logging from Lua. Only takes strings, so it is safe to call from any coroutine.
+        m_impl->state["chalchiu"]["log"] = [](const std::string &level, const std::string &message) {
+            if (level == "error")
+                logger::get()->error("{}", message);
+            else if (level == "warn")
+                logger::get()->warn("{}", message);
+            else if (level == "debug")
+                logger::get()->debug("{}", message);
+            else
+                logger::get()->info("{}", message);
         };
 
         //? Setup "mods" function
@@ -103,82 +116,108 @@ namespace chalchiu
             return std::vector<mod *>{rtn.begin(), rtn.end()};
         };
 
-        //? Setup detour function
-        m_impl->state.do_string(R"lua(
-            chalchiu["detour"] = function(table, func, detour)
+        //? detour, hooks and the print/require wrappers are written in Lua on purpose:
+        //? the game calls require/print from coroutines, and Lua closures always run on the calling
+        //? coroutine. Calling back into Lua from C++ through references bound to the main thread
+        //? (what this used to do) can corrupt the Lua stack and crash the game.
+        auto result = m_impl->state.safe_script(R"lua(
+            local chalchiu = chalchiu
+            local log = chalchiu.log
+            local tostring, select, pcall, xpcall, type = tostring, select, pcall, xpcall, type
+            local concat = table.concat
+            local traceback = debug and debug.traceback
+
+            chalchiu.detour = function(table, func, detour)
                 local original = table[func]
-                
+
                 table[func] = function(...)
                     return detour(original, ...)
                 end
 
-                return function() 
-                    table[func] = original 
+                return function()
+                    table[func] = original
                 end
             end
-        )lua");
 
-        //? Hook "print"
-        auto print = m_impl->state["print"].get<std::function<void(const sol::variadic_args &)>>();
-        m_impl->state["print"] = [print, this](const sol::variadic_args &args) {
-            using std::views::transform;
+            -- hooks: callbacks run once per module, the first time it is required after registration
+            local hooks = {}
+            local applied = setmetatable({}, { __mode = "k" })
 
-            auto to_string = [this](const auto &x) -> std::string {
-                std::string rtn = m_impl->state["tostring"](x);
-
-                if (rtn.find("authentication.prod") != std::string::npos ||
-                    rtn.find("user-blob-storage") != std::string::npos)
-                {
-                    return "<redacted>";
-                }
-
-                return rtn;
-            };
-
-            auto str_args = args | transform([&](const auto &x) { return to_string(x); });
-
-            std::vector<std::string> to_print{str_args.begin(), str_args.end()};
-            logger::get()->info("[print] {}", fmt::join(to_print, ", "));
-
-            return print(args);
-        };
-
-        //? Hook "require"
-        auto require = m_impl->state["require"].get<std::function<sol::object(const std::string &)>>();
-        m_impl->state["require"] = [require, this](const std::string &module) {
-            auto rtn = require(module);
-
-            if (!m_impl->hooks.contains(module))
-            {
-                return rtn;
+            chalchiu.hooks = {
+                add = function(module, callback, callee)
+                    log("info", "[hooks] '" .. tostring(callee or "<unknown>") .. "' registered hook for '" .. tostring(module) .. "'")
+                    hooks[module] = hooks[module] or {}
+                    hooks[module][#hooks[module] + 1] = { callback = callback, callee = callee }
+                end,
             }
 
-            using std::views::filter;
-            auto hooks = m_impl->hooks | filter([&](auto &x) { return x.first == module; });
+            local function run_hooks(module, value)
+                local list = hooks[module]
+                if not list then
+                    return
+                end
 
-            logger::get()->debug("[require] Invoking {} hook(s) registered for '{}'",
-                                 std::distance(hooks.begin(), hooks.end()), module);
+                local key = (type(value) == "table" or type(value) == "userdata") and value or module
+                local done = applied[key]
+                if not done then
+                    done = {}
+                    applied[key] = done
+                end
 
-            for (const auto &[_, hook] : hooks)
-            {
-                try
-                {
-                    auto result = hook(rtn);
+                for i = 1, #list do
+                    local hook = list[i]
+                    if not done[hook] then
+                        done[hook] = true
+                        log("debug", "[require] Invoking hook from '" .. tostring(hook.callee) .. "' for '" .. module .. "'")
 
-                    if (!result.valid())
-                    {
-                        sol::error error = result;
-                        logger::get()->error("[require] A hook for '{}' failed: {}", module, error.what());
-                    }
-                }
-                catch (const std::exception &e)
-                {
-                    logger::get()->error("[require] A hook for '{}' failed: {}", module, e.what());
-                }
-            }
+                        local ok, err
+                        if traceback then
+                            ok, err = xpcall(function() return hook.callback(value) end, traceback)
+                        else
+                            ok, err = pcall(hook.callback, value)
+                        end
 
-            return rtn;
-        };
+                        if not ok then
+                            log("error", "[require] Hook from '" .. tostring(hook.callee) .. "' for '" .. module .. "' failed: " .. tostring(err))
+                        end
+                    end
+                end
+            end
+
+            local original_require = require
+            require = function(module, ...)
+                if not hooks[module] then
+                    return original_require(module, ...)
+                end
+                local value = original_require(module, ...)
+                run_hooks(module, value)
+                return value
+            end
+
+            local function redact(text)
+                if text:find("authentication.prod", 1, true) or text:find("user-blob-storage", 1, true) then
+                    return "<redacted>"
+                end
+                return text
+            end
+
+            local original_print = print
+            print = function(...)
+                local parts = {}
+                for i = 1, select("#", ...) do
+                    parts[i] = redact(tostring((select(i, ...))))
+                end
+                log("info", "[print] " .. concat(parts, ", "))
+                return original_print(...)
+            end
+        )lua",
+                                                   sol::script_pass_on_error);
+
+        if (!result.valid())
+        {
+            sol::error error = result;
+            logger::get()->error("[lua] Failed to set up chalchiu functions: {}", error.what());
+        }
     }
 
     void lua::setup_mods()
@@ -227,6 +266,9 @@ namespace chalchiu
             return;
         }
 
-        m_instance = std::unique_ptr<lua>(new lua{state});
+        //? Leaked on purpose: the game closes its Lua state before this DLL is unloaded, so releasing
+        //? our Lua references (sol objects) in a destructor at exit would write into freed memory
+        //? and crash the game on quit.
+        m_instance = new lua{state};
     }
 } // namespace chalchiu

@@ -1,3 +1,5 @@
+-- Coromon Trainer, updated for Coromon v1.5.4 (see docs/game/1.5.4 for the game modules used here)
+
 local battleDialogOverlayBuilder = globals.require("classes.interface.dialog.battleDialogOverlayBuilder")
 
 local _M = {}
@@ -12,59 +14,67 @@ local function message(...)
   end
 end
 
+-- debugSettings was split into sections (game, battle, coromon1, ...) in newer game versions
+local function setting(section, name)
+  return {
+    get = function()
+      return globals.debugSettings[section][name]
+    end,
+    toggle = function()
+      local value = not globals.debugSettings[section][name]
+      globals.debugSettings[section][name] = value
+      return value
+    end,
+  }
+end
+
+local noClip = setting("game", "noClipMode")
+local alwaysCatch = setting("battle", "alwaysCatchSuccessfully")
+local skipWildBattles = setting("coromon1", "skipWildBattles")
+
+local function onOff(value)
+  return value and "[on]" or "[off]"
+end
+
+-- display:setDebugTimeScale updates display, timer, transition and sprite animations together
+local function setGameSpeed(value)
+  value = math.max(0.5, value)
+  globals.display:setDebugTimeScale(value)
+  return value
+end
+
+local function getGameSpeed()
+  return globals.display.timeScale or 1
+end
+
 _M.mods = {
   { "numPad+", "Increase Game Speed", function()
-    message("Increasing Game Speed")
-
-    local timeScale = globals.timer.timeScale
-    globals.timer.timeScale = timeScale + 0.5
-
-    timeScale = globals.transition.timeScale
-    globals.transition.timeScale = timeScale + 0.5
-
-    timeScale = globals.display.timeScale
-    globals.display.timeScale = timeScale + 0.5
+    message("Game Speed: " .. setGameSpeed(getGameSpeed() + 0.5) .. "x")
   end
   },
   { "numPad-", "Decrease Game Speed", function()
-    message("Decreasing Game Speed")
-
-    local timeScale = globals.timer.timeScale
-    globals.timer.timeScale = timeScale - 0.5
-
-    timeScale = globals.transition.timeScale
-    globals.transition.timeScale = timeScale - 0.5
-
-    timeScale = globals.display.timeScale
-    globals.display.timeScale = timeScale - 0.5
+    message("Game Speed: " .. setGameSpeed(getGameSpeed() - 0.5) .. "x")
   end
   },
   { "numPad*", "Reset Game Speed", function()
-    message("Resetting Game Speed")
-
-    globals.timer.timeScale = 1
-    globals.display.timeScale = 1
-    globals.transition.timeScale = 1
+    message("Game Speed: " .. setGameSpeed(1) .. "x")
   end
   },
   { "numPad/", "Toggle Noclip", function()
-    message("NoClip: " .. (globals.debugSettings.noClipMode and "[off]" or "[on]"))
-    globals.debugSettings.noClipMode = not globals.debugSettings.noClipMode
+    message("NoClip: " .. onOff(noClip.toggle()))
   end
   },
   { "numPad1", "Catch All Coromon", function()
-    message("CatchEmAll: " .. (globals.debugSettings.alwaysCatchSuccessfully and "[off]" or "[on]"))
-    globals.debugSettings.alwaysCatchSuccessfully = not globals.debugSettings.alwaysCatchSuccessfully
+    message("CatchEmAll: " .. onOff(alwaysCatch.toggle()))
   end
   },
   { "numPad2", "Skip Wild Battles", function()
-    message("Skip Battles: " .. (globals.debugSettings.skipWildBattles and "[off]" or "[on]"))
-    globals.debugSettings.skipWildBattles = not globals.debugSettings.skipWildBattles
+    message("Skip Battles: " .. onOff(skipWildBattles.toggle()))
   end
   },
   { "numPad3", "Max Out Coromon", function()
     -- Sometimes noclip can cause issues with interactive dialogues
-    globals.debugSettings.noClipMode = false
+    globals.debugSettings.game.noClipMode = false
 
     local dialog = battleDialogOverlayBuilder:new(false)
     local squad = globals.playerMonsters:getSquad()
@@ -90,25 +100,33 @@ _M.mods = {
   },
 }
 
+local listening = false
+
 hooks.add("classes.interface.screens.titleScreen", function(module)
   detour(module, "new", function(original, ...)
     local ret = original(...)
 
-    globals.eventManager:listen("key", function(event)
-      local key = event.keyName
+    -- The title screen is created again when returning to it, only listen once
+    if not listening then
+      listening = true
 
-      if event.phase ~= "down" then
-        return
-      end
-
-      for _, v in ipairs(_M.mods) do
-        if key == v[1] then
-          v[3]()
+      globals.eventManager:listen("key", function(event)
+        if event.phase ~= "down" then
+          return false
         end
-      end
 
-      return false
-    end)
+        for _, v in ipairs(_M.mods) do
+          if event.keyName == v[1] then
+            local ok, err = pcall(v[3])
+            if not ok then
+              print("[trainer] '" .. v[2] .. "' failed: " .. tostring(err))
+            end
+          end
+        end
+
+        return false
+      end)
+    end
 
     return ret
   end)

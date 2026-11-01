@@ -5,7 +5,7 @@
 
 namespace chalchiu
 {
-    std::unique_ptr<logger> logger::m_instance;
+    logger *logger::m_instance = nullptr;
 
     logger::logger()
     {
@@ -28,7 +28,7 @@ namespace chalchiu
     {
         if (!m_instance)
         {
-            m_instance = std::unique_ptr<logger>(new logger);
+            m_instance = new logger;
         }
 
         return *m_instance;

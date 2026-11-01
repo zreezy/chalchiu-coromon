@@ -1,55 +1,45 @@
 local popup = require("popup")
 
--- This module was removed/renamed in newer game versions. If it is missing, skip the pause menu
--- button instead of failing the whole mod (the popup on the title screen still works).
-local ok, abstractOuterTopBarButtonBuilder = pcall(globals.require,
-  "classes.interface.topBarObjects.abstractOuterTopBarButtonBuilder")
+-- Adds a button to the top bar of the pause menu (squad screen) that opens the mod list.
+-- Written against Coromon v1.5.4, see docs/game/1.5.4 for the game modules used here.
+
+local ok, outerTopBarButtonBuilder = pcall(globals.require,
+  "classes.interface.navBarObjects.topBarObjects.abstractOuterTopBarButtonBuilder")
 
 if not ok then
-  print("[mod_info] Pause menu button unavailable on this game version: " .. tostring(abstractOuterTopBarButtonBuilder))
+  print("[mod_info] Pause menu button unavailable on this game version: " .. tostring(outerTopBarButtonBuilder))
   return
 end
 
 local function makeButton()
-  local parentGroup, modsButton = abstractOuterTopBarButtonBuilder:new(globals.UIContainerStyle.blue)
-  local icon = (globals.imageHelper:new(modsButton, "images/interface/icons/itemIcons/HOLD_EXTRA_XP.png"))
+  local style = globals.UIContainerStyle.gradient_blueOrFluorescent
+  local parentGroup, modsButton = outerTopBarButtonBuilder:new(style)
 
-  globals.magnet:center(icon, 0, 0, modsButton)
+  local icon = globals.imageHelper:new(modsButton, "images/interface/icons/otherIcons/infoIcon.png")
+  globals.magnet:center(icon, 0, -2, modsButton)
 
-  globals.inputHelper:addTouchable(modsButton, globals.inputHelper:onReleaseWithinBounds(
-    function(event)
-      globals.soundHelper:playSound("menuSelect")
-      globals.transition.press(event.target,
-        function()
-          popup:new()
-        end
-      )
+  globals.inputHelper:addTouchable(modsButton,
+    globals.UIButton:createTouchableListener(globals.UIButtonTransition.fancyPress, function()
+      popup:new()
     end)
   )
 
   return parentGroup
 end
 
-local once = false
+hooks.add("classes.interface.screens.SquadScreen", function(builder)
+  detour(builder, "new", function(original, ...)
+    local screen = original(...)
 
-hooks.add("classes.interface.screens.pauseMenuScreen", function(table)
-  detour(table, "new", function(original, ...)
-    once = false
-
-    local restore = detour(globals.pauseMenuScreenBuilder, "new", function(original, ...)
-      local rtn = original(...)
-
-      if not once then
-        rtn:addTopBarObject(makeButton())
-        once = true
-      end
-
-      return rtn
+    -- Never let the button break the pause menu itself
+    local added, err = pcall(function()
+      screen:addTopBarObject(makeButton())
     end)
 
-    local ret = original(...)
-    restore()
+    if not added then
+      print("[mod_info] Could not add pause menu button: " .. tostring(err))
+    end
 
-    return ret
+    return screen
   end)
 end)

@@ -60,7 +60,7 @@ The installation of chalchiu is fairly simple:
 
 Here you'll find information about the provided Coromon mods!  
 
-The mods were originally written for v1.1.2. This fork updates the loader for v1.5.4 (Solar2D 2026.3729); the individual mods are still being updated, so some may not work yet.
+The mods were originally written for v1.1.2 and have been updated for v1.5.4 (Solar2D 2026.3729). See [docs/game](docs/game) for a reference of the game's modules per version.
 
 ## Available Mods
 
@@ -70,9 +70,8 @@ The mods were originally written for v1.1.2. This fork updates the loader for v1
   > When using the `Mod Info` mod, you can take a look at the available hotkeys in the mod list.
   ![Trainer Screenshot](assets/trainer_screenshot.png)
 
-- Randomize Evolution
-  > Brings back the "Randomize Evolution" Settings (and more!) in 1.1.2
-  ![Randomize Evolution Screenshot](assets/randomized_evolution_screenshot.png) 
+- ~~Randomize Evolution~~ (removed)
+  > Randomized evolutions are now a built-in option in the game's Custom Difficulty screen, so this mod is no longer needed.
 
 - Mod Info
   > Shows information about the currently loaded mods, on game startup.  

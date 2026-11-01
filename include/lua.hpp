@@ -9,7 +9,7 @@ namespace chalchiu
         struct impl;
 
       private:
-        static std::unique_ptr<lua> m_instance;
+        static lua *m_instance; //? intentionally never destroyed, see lua::init
 
       private:
         std::unique_ptr<impl> m_impl;

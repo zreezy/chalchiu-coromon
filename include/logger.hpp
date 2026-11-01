@@ -6,7 +6,7 @@ namespace chalchiu
 {
     class logger
     {
-        static std::unique_ptr<logger> m_instance;
+        static logger *m_instance; //? never destroyed, so logging keeps working during shutdown
 
       private:
         std::unique_ptr<spdlog::logger> m_logger;
