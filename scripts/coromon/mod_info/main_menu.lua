@@ -1,4 +1,5 @@
 local popup = require("popup")
+local config = require("config")
 
 local once = false
 
@@ -6,7 +7,7 @@ hooks.add("classes.interface.screens.titleScreen", function(module)
     detour(module, "new", function(original, ...)
         local ret = original(...)
 
-        if not once then
+        if not once and config.showOnStartup then
             popup:new()
             once = true
         end

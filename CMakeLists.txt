@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(chalchiu LANGUAGES CXX VERSION 3.0.0)
+project(chalchiu LANGUAGES CXX VERSION 3.1.0)
 
 # --------------------------------------------------------------------------------------------------------
 # Setup Cross-Compilation on Linux
@@ -38,6 +38,11 @@ endif()
 # --------------------------------------------------------------------------------------------------------
 
 configure_file("constants.hpp.in" "${CMAKE_CURRENT_SOURCE_DIR}/private/constants.hpp")
+
+# Embed the Lua part of the runtime (src/runtime.lua) as a string
+file(READ "src/runtime.lua" CHALCHIU_RUNTIME_LUA)
+configure_file("runtime_lua.hpp.in" "${CMAKE_CURRENT_SOURCE_DIR}/private/runtime_lua.hpp" @ONLY)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/runtime.lua")
 
 # --------------------------------------------------------------------------------------------------------
 # Include directories

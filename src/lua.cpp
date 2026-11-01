@@ -2,6 +2,11 @@
 #include "mod.hpp"
 #include "logger.hpp"
 #include "constants.hpp"
+#include "runtime_lua.hpp"
+
+#include <regex>
+#include <fstream>
+#include <sstream>
 
 #include <map>
 #include <ranges>
@@ -19,7 +24,26 @@ namespace chalchiu
 
       public:
         std::vector<std::unique_ptr<mod>> mods;
+        std::map<std::string, fs::path> mod_paths; //? mod id (folder name) -> mod folder
     };
+
+    namespace
+    {
+        //? Resolves mods/<mod>/<file> for the settings API, refusing anything outside the mod folder
+        std::optional<fs::path> mod_file_path(const std::map<std::string, fs::path> &mod_paths, const std::string &id,
+                                              const std::string &file)
+        {
+            static const std::regex valid_file{R"(^[A-Za-z0-9_\-][A-Za-z0-9_.\-]*$)"};
+
+            auto it = mod_paths.find(id);
+            if (it == mod_paths.end() || !std::regex_match(file, valid_file) || file.find("..") != std::string::npos)
+            {
+                return std::nullopt;
+            }
+
+            return it->second / file;
+        }
+    } // namespace
 
     lua *lua::m_instance = nullptr;
 
@@ -106,7 +130,8 @@ namespace chalchiu
                                         "name", &mod::name,              //
                                         "version", &mod::version,        //
                                         "author", &mod::author,          //
-                                        "description", &mod::description //
+                                        "description", &mod::description, //
+                                        "id", &mod::id                   //
         );
 
         m_impl->state["chalchiu"]["mods"] = [this]() {
@@ -116,107 +141,64 @@ namespace chalchiu
             return std::vector<mod *>{rtn.begin(), rtn.end()};
         };
 
-        //? detour, hooks and the print/require wrappers are written in Lua on purpose:
-        //? the game calls require/print from coroutines, and Lua closures always run on the calling
-        //? coroutine. Calling back into Lua from C++ through references bound to the main thread
-        //? (what this used to do) can corrupt the Lua stack and crash the game.
-        auto result = m_impl->state.safe_script(R"lua(
-            local chalchiu = chalchiu
-            local log = chalchiu.log
-            local tostring, select, pcall, xpcall, type = tostring, select, pcall, xpcall, type
-            local concat = table.concat
-            local traceback = debug and debug.traceback
-
-            chalchiu.detour = function(table, func, detour)
-                local original = table[func]
-
-                table[func] = function(...)
-                    return detour(original, ...)
-                end
-
-                return function()
-                    table[func] = original
-                end
-            end
-
-            -- hooks: callbacks run once per module, the first time it is required after registration
-            local hooks = {}
-            local applied = setmetatable({}, { __mode = "k" })
-
-            chalchiu.hooks = {
-                add = function(module, callback, callee)
-                    log("info", "[hooks] '" .. tostring(callee or "<unknown>") .. "' registered hook for '" .. tostring(module) .. "'")
-                    hooks[module] = hooks[module] or {}
-                    hooks[module][#hooks[module] + 1] = { callback = callback, callee = callee }
-                end,
+        //? Files inside a mod's own folder (used by the settings API). Strings only, safe from any coroutine.
+        m_impl->state["chalchiu"]["read_mod_file"] = [this](const std::string &id,
+                                                             const std::string &file) -> sol::optional<std::string> {
+            auto path = mod_file_path(m_impl->mod_paths, id, file);
+            if (!path || !fs::is_regular_file(*path))
+            {
+                return sol::nullopt;
             }
 
-            local function run_hooks(module, value)
-                local list = hooks[module]
-                if not list then
-                    return
-                end
+            std::ifstream stream{*path, std::ios::binary};
+            std::stringstream content;
+            content << stream.rdbuf();
 
-                local key = (type(value) == "table" or type(value) == "userdata") and value or module
-                local done = applied[key]
-                if not done then
-                    done = {}
-                    applied[key] = done
-                end
+            return content.str();
+        };
 
-                for i = 1, #list do
-                    local hook = list[i]
-                    if not done[hook] then
-                        done[hook] = true
-                        log("debug", "[require] Invoking hook from '" .. tostring(hook.callee) .. "' for '" .. module .. "'")
+        m_impl->state["chalchiu"]["write_mod_file"] = [this](const std::string &id, const std::string &file,
+                                                              const std::string &content) {
+            auto path = mod_file_path(m_impl->mod_paths, id, file);
+            if (!path)
+            {
+                logger::get()->error("[mods] Refusing to write '{}' for mod '{}'", file, id);
+                return false;
+            }
 
-                        local ok, err
-                        if traceback then
-                            ok, err = xpcall(function() return hook.callback(value) end, traceback)
-                        else
-                            ok, err = pcall(hook.callback, value)
-                        end
+            //? Write to a temporary file first so a crash can't leave a half-written settings file
+            auto temp = *path;
+            temp += ".tmp";
 
-                        if not ok then
-                            log("error", "[require] Hook from '" .. tostring(hook.callee) .. "' for '" .. module .. "' failed: " .. tostring(err))
-                        end
-                    end
-                end
-            end
+            {
+                std::ofstream stream{temp, std::ios::binary | std::ios::trunc};
+                stream << content;
+                if (!stream)
+                {
+                    return false;
+                }
+            }
 
-            local original_require = require
-            require = function(module, ...)
-                if not hooks[module] then
-                    return original_require(module, ...)
-                end
-                local value = original_require(module, ...)
-                run_hooks(module, value)
-                return value
-            end
+            std::error_code ec;
+            fs::rename(temp, *path, ec);
 
-            local function redact(text)
-                if text:find("authentication.prod", 1, true) or text:find("user-blob-storage", 1, true) then
-                    return "<redacted>"
-                end
-                return text
-            end
+            if (ec)
+            {
+                logger::get()->error("[mods] Could not save '{}': {}", path->string(), ec.message());
+                return false;
+            }
 
-            local original_print = print
-            print = function(...)
-                local parts = {}
-                for i = 1, select("#", ...) do
-                    parts[i] = redact(tostring((select(i, ...))))
-                end
-                log("info", "[print] " .. concat(parts, ", "))
-                return original_print(...)
-            end
-        )lua",
-                                                   sol::script_pass_on_error);
+            return true;
+        };
+
+        //? The rest of the runtime (detour, hooks, require/print wrappers, settings, hotkeys) is Lua,
+        //? see src/runtime.lua for why.
+        auto result = m_impl->state.safe_script(runtime_lua, sol::script_pass_on_error, "@chalchiu/runtime.lua");
 
         if (!result.valid())
         {
             sol::error error = result;
-            logger::get()->error("[lua] Failed to set up chalchiu functions: {}", error.what());
+            logger::get()->error("[lua] Failed to set up chalchiu runtime: {}", error.what());
         }
     }
 
@@ -235,6 +217,7 @@ namespace chalchiu
                 continue;
 
             logger::get()->info("[mods] Loading '{}'", path.string());
+            m_impl->mod_paths[path.parent_path().filename().string()] = path.parent_path();
 
             std::unique_ptr<chalchiu::mod> mod;
 

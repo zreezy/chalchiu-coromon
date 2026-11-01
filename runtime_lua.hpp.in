@@ -1,0 +1,7 @@
+#pragma once
+
+// Generated from src/runtime.lua by CMake, do not edit.
+namespace chalchiu
+{
+    inline constexpr const char *runtime_lua = R"chalchiu_runtime(@CHALCHIU_RUNTIME_LUA@)chalchiu_runtime";
+} // namespace chalchiu

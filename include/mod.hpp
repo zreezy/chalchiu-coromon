@@ -23,6 +23,7 @@ namespace chalchiu
         mod(mod &&) noexcept;
 
       public:
+        [[nodiscard]] std::string id() const;
         [[nodiscard]] std::string name() const;
         [[nodiscard]] std::string author() const;
         [[nodiscard]] std::string version() const;

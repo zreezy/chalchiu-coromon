@@ -1,4 +1,5 @@
 local popup = require("popup")
+local config = require("config")
 
 -- Adds a small info button to the pause menu's top bar (squad screen) that opens the mod list.
 -- Written against Coromon v1.5.4, see docs/game/1.5.4 for the game modules used here.
@@ -39,6 +40,10 @@ end
 hooks.add("classes.interface.screens.SquadScreen", function(builder)
   detour(builder, "new", function(original, ...)
     local screen = original(...)
+
+    if not config.pauseMenuButton then
+      return screen
+    end
 
     -- Never let the button break the pause menu itself
     local added, err = pcall(function()

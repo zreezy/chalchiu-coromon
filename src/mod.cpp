@@ -15,6 +15,7 @@ namespace chalchiu
         sol::environment env;
 
       public:
+        std::string id;
         std::string name;
         std::string author;
         std::string version;
@@ -33,6 +34,11 @@ namespace chalchiu
     std::string mod::name() const
     {
         return m_impl->name;
+    }
+
+    std::string mod::id() const
+    {
+        return m_impl->id;
     }
 
     std::string mod::author() const
@@ -75,11 +81,9 @@ namespace chalchiu
         //? Expose "detour" as non namespaced function
         rtn->m_impl->env["detour"] = rtn->m_impl->env["chalchiu"]["detour"];
 
-        //? Overwrite hooks, so that the mod name is passed as the callee
-        rtn->m_impl->env["hooks"] = state.create_table();
-        rtn->m_impl->env["hooks"]["add"] = [=, impl = rtn->m_impl.get()](const sol::variadic_args &args) {
-            return impl->env["chalchiu"]["hooks"]["add"](sol::as_args(args), folder_name);
-        };
+        //? hooks / settings / hotkeys that know which mod they belong to (implemented in runtime.lua)
+        rtn->m_impl->id = folder_name;
+        state["chalchiu"]["_bind_mod_env"](rtn->m_impl->env, folder_name);
 
         //? Overwrite "require" so that we can properly load files in the same mod folder
         //? Leaked on purpose (see lua::init): must not release Lua references at process exit

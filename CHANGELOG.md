@@ -3,6 +3,37 @@
 Releases are published automatically when the version in `CMakeLists.txt` changes.
 The section for that version below becomes the release notes.
 
+## [3.1.0] - 2026-11-01
+
+### New mods
+- **Potent Alert**: notification and sound when a potent or perfect Coromon appears.
+- **XP & Gold Boost**: multiplies battle XP (2x by default) and trainer gold. No effect in online battles.
+- **Text Speed+**: dialogue text faster than the game's 3x maximum (6x by default).
+- **Area Encounter Info**: press `numPad0` in the overworld to see the Coromon in your current area.
+
+### Mod settings
+- Every mod's settings can now be changed in-game: open **Loaded Mods**, select a mod and press the
+  check button. Settings are saved to `mods/<mod>/settings.lua`.
+- All trainer hotkeys can be rebound in-game (press the check button, then the new key).
+
+### Coromon Trainer (v1.3)
+- New toggles: skip trainer battles (`numPad5`), no energy cost (`numPad6`), fast battle intros
+  (`numPad7`), hide world interface (`numPad8`), no move damage (unbound by default).
+- Give items with `numPad9`; the item and amount are settings. Gold per press is a setting too.
+- Battle cheats are switched off automatically when an online battle starts, and can't be turned on
+  during one.
+
+### Mod Info (v1.3)
+- Settings page for every mod, and its own settings: show the mod list on startup, show the pause
+  menu button.
+
+### For modders
+- New `settings.define(...)` and `hotkeys.add(...)` APIs (see README).
+- Hooks registered for a module the game has already loaded now apply immediately, instead of
+  waiting for the next `require`.
+- The Lua part of the loader now lives in `src/runtime.lua`.
+- Offline tests (`lua5.1 tests/run.lua`) for the runtime and all mods, run in CI.
+
 ## [3.0.0] - 2026-11-01
 
 First release of this fork, updated for **Coromon v1.5.4** (Solar2D 2026.3729).

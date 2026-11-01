@@ -64,19 +64,50 @@ The mods were originally written for v1.1.2 and have been updated for v1.5.4 (So
 
 ## Available Mods
 
-- Trainer
-  > A simple trainer, which allows you to fun things like noclip, max out all your coromon, and speed up the game!  
-  >
-  > When using the `Mod Info` mod, you can take a look at the available hotkeys in the mod list.
+Every mod's settings (including all hotkeys) can be changed in-game: open the **Loaded Mods** popup
+(shown on startup, or with the info button next to your gold in the pause menu), select a mod and press
+the check button. Settings are saved to `mods/<mod>/settings.lua`.
+
+- **Mod Info**
+  > Shows the loaded mods on startup and from the pause menu, and lets you change each mod's settings.
+  ![Mod Info Screenshot](assets/mod_info_screenshot.png)
+
+- **Coromon Trainer**
+  > Hotkeys for game speed, noclip, catching every Coromon, skipping wild/trainer battles, maxing out your squad,
+  > adding gold and items, no energy cost, faster battle intros, hiding the interface and more. Keys, gold amount
+  > and the item to give are configurable. Battle cheats are switched off automatically in online battles.
   ![Trainer Screenshot](assets/trainer_screenshot.png)
+
+  | Default key | Action |
+  |---|---|
+  | `numPad+` / `numPad-` / `numPad*` | Increase / decrease / reset game speed |
+  | `numPad/` | Toggle noclip |
+  | `numPad1` | Catch all Coromon |
+  | `numPad2` | Skip wild battles |
+  | `numPad3` | Max out squad |
+  | `numPad4` | Add gold |
+  | `numPad5` | Skip trainer battles |
+  | `numPad6` | No energy cost |
+  | `numPad7` | Fast battle intros |
+  | `numPad8` | Hide world interface (screenshots) |
+  | `numPad9` | Give item |
+  | (unbound) | No move damage (affects everyone) |
+
+- **Potent Alert**
+  > A notification and sound when a potent or perfect Coromon appears in a wild battle.
+
+- **XP & Gold Boost**
+  > Multiplies battle XP (2x by default) and trainer gold rewards. No effect in online battles.
+
+- **Text Speed+**
+  > Dialogue text faster than the game's 3x maximum (6x by default).
+
+- **Area Encounter Info**
+  > Press `numPad0` in the overworld to see which Coromon live in your current area, their chances and which ones
+  > you've seen, using the game's own world map popup.
 
 - ~~Randomize Evolution~~ (removed)
   > Randomized evolutions are now a built-in option in the game's Custom Difficulty screen, so this mod is no longer needed.
-
-- Mod Info
-  > Shows information about the currently loaded mods, on game startup.  
-  Also adds a button to the pause menu (top right corner), which allows you to bring up the menu again!
-  ![Mod Info Screenshot](assets/mod_info_screenshot.png) 
 
 </p>
 </details>
@@ -183,6 +214,68 @@ end)
 </td>
 </tr>
 </table>
+
+### Settings
+
+`settings.define` declares your mod's settings. Values are loaded from `mods/<your mod>/settings.lua` (if it exists),
+saved whenever they change, and shown on your mod's settings page in Mod Info.
+
+Supported types: `boolean`, `number` (`min`, `max`, `step`), `choice` (`options`), `key` (a key name, for hotkeys)
+and `string` (file only). `label` and `description` are shown in-game.
+
+<table>
+<tr>
+<td>Defining settings</td>
+</tr>
+<tr>
+<td>
+
+```lua
+local config = settings.define({
+  { key = "multiplier", label = "XP multiplier", type = "choice", default = 2,
+    options = { { value = 1, label = "Off" }, { value = 2, label = "2x" }, { value = 3, label = "3x" } } },
+  { key = "sound", label = "Play a sound", type = "boolean", default = true },
+  { key = "hotkey", label = "Key: Do the thing", type = "key", default = "numPad5" },
+})
+
+print(config.multiplier)      -- current value
+config:set("sound", false)    -- validated and saved
+config:onChange(function(key, value) end)
+```
+
+</td>
+</tr>
+</table>
+
+### Hotkeys
+
+`hotkeys.add` runs a function when a key is pressed. Pass a function instead of a key name to read the key from your
+settings on every press, so rebinding in Mod Info works immediately.
+
+<table>
+<tr>
+<td>Registering a hotkey</td>
+</tr>
+<tr>
+<td>
+
+```lua
+hotkeys.add(function() return config.hotkey end, function()
+  print("pressed!")
+end, "Do the thing")
+```
+
+</td>
+</tr>
+</table>
+
+### Game reference
+
+[docs/game](docs/game) lists every game module, its functions (with parameter names) and settings, plus all globals,
+for each supported game version. Run `python tools/gamedocs/gamedocs.py check scripts/coromon --version <version>`
+to find references to modules or settings that no longer exist, and `lua5.1 tests/run.lua` to run the offline tests.
+
+Hooks registered for a module the game has already loaded are applied immediately.
 
 ### Globals
 
