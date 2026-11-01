@@ -1,0 +1,221 @@
+# classes.monsters
+
+Coromon 1.5.4. 1 module(s). [Back to index](../README.md)
+
+[Monster](#monster)
+
+### Monster
+
+`classes.monsters.Monster`
+
+- returns `t`
+
+- `Monster:getMaxCriticalHitCharge()`
+- `Monster:cast(_savedMonster)`
+- `Monster:uncast(_castedMonster)`
+- `Monster:updateSavedMonsterToMonster(_savedMonster)`
+- `Monster:mapToSaveableMonster(_monster)`
+- `Monster:clone(_monster)`
+- `Monster:new(_options)`
+- `Monster:newDebug(_options)`
+- `Monster:newInSpinner(_catchSpinnerUID, _options)`
+- `Monster:newForPlayer(_catchSpinnerUID, _catchLocationUID, _options)`
+- `Monster:newForDebugPlayer(_options)`
+- `Monster:calculateStatForLevel(_statUID, _level, _baseStatValue)`
+- `Monster:ensureValidPotentialStats(_potentialStats, _potentialLevel)`
+- `Monster:getMaxPotentialLevelForPotential(_potential)`
+- `Monster:getPotentialLevelUpArrayForPotential(_potential)`
+- `Monster:getAmountOfPotentialStatsUnlockedAtPotentialLevel(_potentialLevel)`
+
+<details><summary>Instance / other functions (188)</summary>
+
+- `monsterMeta:ensureValidTrait()`
+- `monsterMeta:ensureValidHealthAndEnergy()`
+- `monsterMeta:ensureValidSelectedSkillUIDs(_alsoValidateLevel)`
+- `monsterMeta:createMonsterAvatar(_parent, _imageMutator, _options)`
+- `monsterMeta:createHoverableAndSelectableMonsterAvatar(_parent, _imageMutator, _options)`
+- `monsterMeta:createMonsterAvatarWithoutFrame(_parent, _imageMutator)`
+- `monsterMeta:createAnimatedCharacterSprite(_parent, _mutator)`
+- `monsterMeta:createSprite(_parent, _side, _mutator)`
+- `monsterMeta:createAnimatedSprite(_parent, _side, _mutator)`
+- `monsterMeta:loadCrySound()`
+- `monsterMeta:unloadCrySound()`
+- `monsterMeta:playCrySound(_onComplete)`
+- `monsterMeta:loadAndPlayCrySound(_onComplete)`
+- `monsterMeta:loadSkillSounds()`
+- `monsterMeta:unloadSkillSounds()`
+- `monsterMeta:getMonsterData()`
+- `monsterMeta:convertMonsterToPlayerMonster(_catchSpinnerUID, _catchLocationUID)`
+- `monsterMeta:convertPlayerMonsterToMonster()`
+- `monsterMeta:getMonsterFamilyData()`
+- `monsterMeta:getUID()`
+- `monsterMeta:setUID(_UID, _dontResetTraitOrSkillsIfMonsterFamilyDataChanged)`
+- `monsterMeta:getIdentifier()`
+- `monsterMeta:setNickname(_nickname)`
+- `monsterMeta:getNickname()`
+- `monsterMeta:getDisplayName()`
+- `monsterMeta:getDisplayNameWithTypeColor()`
+- `monsterMeta:getCatchSpinnerUID()`
+- `monsterMeta:getCatchLocationUID()`
+- `monsterMeta:getCatchDate()`
+- `monsterMeta:getCatchLevel()`
+- `monsterMeta:isCaught()`
+- `monsterMeta:setCatchSpinnerUID(_spinnerUID)`
+- `monsterMeta:applyCondition(_condition)`
+- `monsterMeta:getCondition()`
+- `monsterMeta:hasCondition()`
+- `monsterMeta:removeCondition()`
+- `monsterMeta:resetSideEffectTurn(_skillUID)`
+- `monsterMeta:cancelSideEffectTurn(_skillUID)`
+- `monsterMeta:increaseSideEffectTurn(_skillUID)`
+- `monsterMeta:getSideEffectTurn(_skillUID)`
+- `monsterMeta:increaseTraitEffectCounter(_traitUID)`
+- `monsterMeta:getTraitEffectCounter(_traitUID)`
+- `monsterMeta:increaseCriticalHitCharge(_increaseAmount)`
+- `monsterMeta:resetCriticalHitCharge()`
+- `monsterMeta:getCriticalHitCharge()`
+- `monsterMeta:hasMaxCriticalHitCharge()`
+- `monsterMeta:calculateXpReward()`
+- `monsterMeta:getAmountOfSkippedEvolutionsForLevel(_level)`
+- `monsterMeta:getAmountOfSkippedEvolutions()`
+- `monsterMeta:hasSkippedEvolutions()`
+- `monsterMeta:getUnmutatedTraitEnhancementStageForAmountOfSkippedEvolutions(_amountOfSkippedEvolutions, _ignoreIfTraitHasNoEnhancements)`
+- `monsterMeta:getTraitEnhancementStageForAmountOfSkippedEvolutions(_amountOfSkippedEvolutions, _ignoreIfTraitHasNoEnhancements)`
+- `monsterMeta:getTraitEnhancementStage()`
+- `monsterMeta:getRandomizableNextEvolutionLevelForAmountOfSkippedEvolutions(_amountOfSkippedEvolutions)`
+- `monsterMeta:getRandomizableNextEvolutionMonsterUIDForAmountOfSkippedEvolutions(_amountOfSkippedEvolutions)`
+- `monsterMeta:getRandomizableNextEvolutionLevel()`
+- `monsterMeta:getRandomizableNextEvolutionMonsterUID()`
+- `monsterMeta:getRandomizablePrimaryType()`
+- `monsterMeta:getRandomizableSecondaryType()`
+- `monsterMeta:hasRandomizableType(_type)`
+- `monsterMeta:getSelectedSkillUIDs()`
+- `monsterMeta:getSelectedSkillsData()`
+- `monsterMeta:setSelectedSkillUIDs(_selectedSkillUIDs)`
+- `monsterMeta:setSelectedSkillUIDsToLastFourOfSkillsForLevel()`
+- `monsterMeta:removeSelectedSkill(_skillUID)`
+- `monsterMeta:addSelectedSkill(_skillUID)`
+- `monsterMeta:getRandomizableSkillObjectsWithFlashedSkillObjects()`
+- `monsterMeta:getRandomizableSkillUIDsWithFlashedSkillObjects()`
+- `monsterMeta:getRandomizableSkillObjectsForLevelWithFlashedSkillObjects()`
+- `monsterMeta:getRandomizableSkillUIDsForLevelWithFlashedSkillUIDs()`
+- `monsterMeta:getFlashedSkills()`
+- `monsterMeta:addFlashSkill(_skillUID)`
+- `monsterMeta:getLevel()`
+- `monsterMeta:hasReachedMaxLevel()`
+- `monsterMeta:hasReachedRestrictedLevel()`
+- `monsterMeta:getLevelForXpRewardCalculation()`
+- `monsterMeta:tryIncreaseLevel(_amountOfLevelsToIncrease)`
+- `monsterMeta:addXp(_value)`
+- `monsterMeta:setXp(_value)`
+- `monsterMeta:getXp()`
+- `monsterMeta:getCatchLevelXp()`
+- `monsterMeta:getPreviousLevelXp()`
+- `monsterMeta:getCurrentLevelXp()`
+- `monsterMeta:getNextLevelXp(_levelOffset)`
+- `monsterMeta:getNextPotentialLevelXp()`
+- `monsterMeta:getXpRequiredForNextLevel()`
+- `monsterMeta:getXpRequiredForNextPotentialLevel()`
+- `monsterMeta:hasMaxXp()`
+- `monsterMeta:setFullyRestored()`
+- `monsterMeta:isFullyRestored()`
+- `monsterMeta:isAlive()`
+- `monsterMeta:isFainted()`
+- `monsterMeta:getMaxHealth()`
+- `monsterMeta:hasMaxHealth()`
+- `monsterMeta:getPercentageOfMaxHealth(_percentage)`
+- `monsterMeta:getDeltaToPercentageOfMaxHealth(_percentage)`
+- `monsterMeta:getPercentageOfCurrentHealth(_percentage)`
+- `monsterMeta:getDeltaToPercentageOfCurrentHealth(_percentage)`
+- `monsterMeta:getHealth()`
+- `monsterMeta:getHealthStage()`
+- `monsterMeta:getHealthPercentage()`
+- `monsterMeta:setHealth(_value)`
+- `monsterMeta:setHealthToPercentageOfMaxHealth(_percentage)`
+- `monsterMeta:setHealthToMaxHealth()`
+- `monsterMeta:adjustHealth(_value)`
+- `monsterMeta:adjustHealthByPercentage(_percentage)`
+- `monsterMeta:getPercentageOfMaxHealthAsDamage(_percentage)`
+- `monsterMeta:getPercentageOfCurrentHealthAsDamage(_percentage)`
+- `monsterMeta:getMaxEnergy()`
+- `monsterMeta:getMaxOverchargedEnergy()`
+- `monsterMeta:getMaxOrOverchargedEnergy()`
+- `monsterMeta:hasMaxOrOverchargedEnergy()`
+- `monsterMeta:hasMaxOverchargedEnergy()`
+- `monsterMeta:getPercentageOfMaxEnergy(_percentage)`
+- `monsterMeta:getEnergy()`
+- `monsterMeta:getEnergyPercentage()`
+- `monsterMeta:setEnergy(_value)`
+- `monsterMeta:setEnergyToPercentageOfMaxEnergy(_percentage)`
+- `monsterMeta:setEnergyToMaxEnergy()`
+- `monsterMeta:setEnergyToMaxEnergyIfNotOvercharged()`
+- `monsterMeta:setEnergyToMaxOverchargedEnergy()`
+- `monsterMeta:adjustEnergy(_value)`
+- `monsterMeta:adjustEnergyByPercentage(_value)`
+- `monsterMeta:getMaxCrimsoniteAura()`
+- `monsterMeta:hasMaxCrimsoniteAura()`
+- `monsterMeta:getCrimsoniteAura()`
+- `monsterMeta:getCrimsoniteAuraPercentage()`
+- `monsterMeta:setCrimsoniteAura(_value)`
+- `monsterMeta:getTraitUID()`
+- `monsterMeta:getTrait()`
+- `monsterMeta:getTraitIfInstanceOf(_class)`
+- `monsterMeta:removeTrait()`
+- `monsterMeta:setTraitByUID(_UID)`
+- `monsterMeta:getHoldItemUID()`
+- `monsterMeta:getHoldItem()`
+- `monsterMeta:getHoldItemBattleEffect()`
+- `monsterMeta:removeHoldItem()`
+- `monsterMeta:removeHoldItemAndSendToInventory()`
+- `monsterMeta:setHoldItemByUID(_UID)`
+- `monsterMeta:getSecondaryHoldItemUID()`
+- `monsterMeta:getSecondaryHoldItem()`
+- `monsterMeta:getSecondaryHoldItemBattleEffect()`
+- `monsterMeta:removeSecondaryHoldItem()`
+- `monsterMeta:removeSecondaryHoldItemAndSendToInventory()`
+- `monsterMeta:setSecondaryHoldItemByUID(_UID)`
+- `monsterMeta:setPotentialStats(_potentialStats)`
+- `monsterMeta:getPotentialStats()`
+- `monsterMeta:getPotentialStat(_statUID)`
+- `monsterMeta:getAmountOfPotentialStatsDistributed()`
+- `monsterMeta:getAmountOfPotentialStatsUndistributed()`
+- `monsterMeta:getAmountOfPotentialStatsUndistributedForMaxPotential(_amountOfPotentialStatsDistributed)`
+- `monsterMeta:getPotential()`
+- `monsterMeta:hasReachedMaxPotentialLevel()`
+- `monsterMeta:getMaxPotentialLevel()`
+- `monsterMeta:getPotentialLevelUpArray()`
+- `monsterMeta:getPotentialLevel()`
+- `monsterMeta:getPotentialLevelForXp(_xp)`
+- `monsterMeta:getXpForPotentialLevel(_level)`
+- `monsterMeta:getAmountOfPotentialStatsUnlocked()`
+- `monsterMeta:getPotentialStatsAtLowerXp(_xp)`
+- `monsterMeta:populateUndistributedPotentialStats(_amountOfPotentialStatsUndistributed)`
+- `monsterMeta:setDidRerollPotential()`
+- `monsterMeta:getDidRerollPotential()`
+- `monsterMeta:rerollPotential()`
+- `monsterMeta:setPotential(_potential)`
+- `monsterMeta:getAvailablePotentialCategories()`
+- `monsterMeta:getPotentialCategory()`
+- `monsterMeta:setVisualPotentialCategory(_monsterPotentialCategory)`
+- `monsterMeta:getVisualPotentialCategory()`
+- `monsterMeta:hasKnownPotential()`
+- `monsterMeta:createPotentialCategoryIcon(_parent)`
+- `monsterMeta:setSpriteSkinUID(_spriteSkinUID)`
+- `monsterMeta:getSpriteSkinUID()`
+- `monsterMeta:isHungryForPurrgyNibble()`
+- `monsterMeta:consumePurrgyNibble()`
+- `monsterMeta:mutateEvolutionLevel(_evolutionLevel)`
+- `monsterMeta:hasPiratedSoftwareInstalled()`
+- `monsterMeta:setPiratedSoftwareInstalled(_boolean)`
+- `monsterMeta:hasEncounteredPiratedSoftwareError()`
+- `monsterMeta:setEncounteredPiratedSoftwareError(_boolean)`
+- `monsterMeta:getBattleEffects()`
+- `monsterMeta:getMutatedBaseStats(_amountOfSkippedEvolutions)`
+- `monsterMeta:getMutatedBaseStat(_statUID, _amountOfSkippedEvolutions)`
+- `monsterMeta:calculateStatForLevel(_statUID, _level)`
+- `monsterMeta:calculateStatsForLevel(_level)`
+- `monsterMeta:calculateStat(_statUID)`
+- `monsterMeta:calculateStats()`
+- `monsterMeta:onMonsterStatsChanged(_originalMonsterStats, _onHealthUpdated, _onEnergyUpdated, _preventHeal)`
+
+</details>

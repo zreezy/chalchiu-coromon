@@ -18,6 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check mods against the latest game docs
+        run: |
+          latest=$(ls docs/game | grep -E '^[0-9]' | sort -V | tail -1)
+          python3 tools/gamedocs/gamedocs.py check scripts/coromon --version "$latest"
+
       - name: Install llvm-mingw
         run: |
           curl -sSL -o llvm-mingw.tar.xz "https://github.com/mstorsjo/llvm-mingw/releases/download/20241217/${LLVM_MINGW}.tar.xz"
