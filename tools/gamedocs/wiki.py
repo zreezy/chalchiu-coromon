@@ -1,8 +1,8 @@
 """
-Builds the GitHub wiki from the repository: the README (split into pages) and docs/game.
+Builds the GitHub wiki from the repository: the README (Home), the guides in docs/ and docs/game.
 
 The repository stays the source of truth; the wiki is regenerated from it, so edit the README or
-re-run `gamedocs.py generate` and then `gamedocs.py wiki`, rather than editing wiki pages by hand.
+docs/*.md, or re-run `gamedocs.py generate`, then `gamedocs.py wiki`, rather than editing wiki pages by hand.
 
 GitHub wikis are flat: every page is a top-level file and links use the page name without `.md`.
 Relative links to pages that exist on the wiki are rewritten to wiki links; links to other files in
@@ -13,21 +13,18 @@ from __future__ import annotations
 
 import posixpath
 import re
-import shutil
 import subprocess
 from pathlib import Path
 
 MD_LINK = re.compile(r"(!?)\[([^\]]*)\]\(([^)\s]+)(\s+\"[^\"]*\")?\)")
 HTML_SRC = re.compile(r"""(<img\b[^>]*\bsrc=)(["']?)([^"'\s>]+)\2""", re.IGNORECASE)
-WRAPPER_LINES = re.compile(r"^\s*(<details>.*|</details>|<p>|</p>)\s*$", re.IGNORECASE)
 
-# README top-level section -> wiki page
-README_PAGES = {
-    "Introduction": "Home",
-    "Usage": "Installation",
-    "Coromon": "Mods",
-    "For Modders": "Writing-Mods",
-    "Releasing": "Releasing",
+# Guides in docs/ -> wiki page (in sidebar order)
+GUIDE_PAGES = {
+    "docs/installation.md": "Installation",
+    "docs/mods.md": "Mods",
+    "docs/writing-mods.md": "Writing-Mods",
+    "docs/releasing.md": "Releasing",
 }
 
 
@@ -51,7 +48,7 @@ class Wiki:
     # ---------------------------------------------------------------------------------------------
 
     def page_names(self) -> set[str]:
-        return set(self.sources.values()) | set(README_PAGES.values()) | set(self.pages)
+        return set(self.sources.values()) | set(self.pages)
 
     def page_for(self, repo_path: str, page: str):
         self.sources[repo_path] = page
@@ -63,6 +60,9 @@ class Wiki:
         base = posixpath.dirname(source)
 
         def target(url: str, image: bool) -> str:
+            wiki_url = f"https://github.com/{self.slug}/wiki"
+            if url == wiki_url or url.startswith(wiki_url + "/"):
+                return url[len(wiki_url) + 1:] or "Home"  # this wiki: use a page link
             if re.match(r"^[a-z][a-z0-9+.-]*:", url, re.IGNORECASE) or url.startswith("#"):
                 return url  # absolute URL, mailto:, or in-page anchor
             path, _, anchor = url.partition("#")
@@ -102,27 +102,6 @@ class Wiki:
             (out / f"{page}.md").write_text(markdown.rstrip() + "\n", encoding="utf-8")
 
 
-def split_readme(text: str) -> tuple[str, dict[str, str]]:
-    """Returns (header before the first top-level heading, {section title: body})."""
-    header, sections, current, buffer = [], {}, None, []
-    for line in text.splitlines():
-        heading = re.match(r"^# (.+?)\s*$", line)
-        if heading:
-            if current is None:
-                header = buffer
-            else:
-                sections[current] = buffer
-            current, buffer = heading.group(1), []
-            continue
-        if not WRAPPER_LINES.match(line):
-            buffer.append(line)
-    if current is None:
-        header = buffer
-    else:
-        sections[current] = buffer
-    return "\n".join(header).strip(), {k: "\n".join(v).strip() for k, v in sections.items()}
-
-
 def version_key(version: str):
     return [int(p) if p.isdigit() else p for p in re.split(r"[.\-]", version)]
 
@@ -148,19 +127,18 @@ def build(repo_root: Path, out: Path, slug: str | None = None, branch: str = "ma
         # "(root).md" has parentheses, which markdown link targets can't contain unescaped
         wiki.page_for(f"docs/game/{version}/packages/root.md", f"{prefix}-root")
 
-    # README -> Home, Installation, Mods, Writing-Mods, Releasing
-    header, sections = split_readme((repo_root / "README.md").read_text(encoding="utf-8"))
-    for title, page in README_PAGES.items():
-        body = sections.get(title)
-        if body is None:
-            continue
-        if page == "Home":
-            links = "\n".join(f"- [{p.replace('-', ' ')}]({p})" for p in README_PAGES.values() if p != "Home")
-            body = (f"{header}\n\n# {title}\n\n{body}\n\n## Pages\n\n{links}\n"
-                    f"- [Game Reference](Game-Reference): modules, functions, settings and globals per game version\n")
-        else:
-            body = f"# {page.replace('-', ' ')}\n\n{body}"
-        wiki.add(page, body, "README.md")
+    for source, page in GUIDE_PAGES.items():
+        wiki.page_for(source, page)
+
+    # README -> Home, with links to the other pages
+    links = "\n".join(f"- [{p.replace('-', ' ')}]({p})" for p in GUIDE_PAGES.values())
+    home = (repo_root / "README.md").read_text(encoding="utf-8").rstrip()
+    home += (f"\n\n# Pages\n\n{links}\n"
+             "- [Game Reference](Game-Reference): modules, functions, settings and globals per game version\n")
+    wiki.add("Home", home, "README.md")
+
+    for source, page in GUIDE_PAGES.items():
+        wiki.add(page, (repo_root / source).read_text(encoding="utf-8"), source)
 
     # Game reference
     wiki.add("Game-Reference", (docs / "README.md").read_text(encoding="utf-8"), "docs/game/README.md")
@@ -179,8 +157,7 @@ def build(repo_root: Path, out: Path, slug: str | None = None, branch: str = "ma
     # Sidebar and footer
     sidebar = [
         "**chalchiu for Coromon**", "",
-        "- [Home](Home)", "- [Installation](Installation)", "- [Mods](Mods)",
-        "- [Writing Mods](Writing-Mods)", "- [Releasing](Releasing)", "",
+        "- [Home](Home)", *(f"- [{p.replace('-', ' ')}]({p})" for p in GUIDE_PAGES.values()), "",
         "**Game Reference**", "",
     ]
     for version in reversed(versions):

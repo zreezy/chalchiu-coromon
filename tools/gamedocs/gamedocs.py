@@ -384,7 +384,7 @@ def write_versions_index():
         "   ```",
         "   python tools/gamedocs/gamedocs.py check scripts/coromon --version <new version>",
         "   ```",
-        "5. Update the GitHub wiki (README pages + this reference) from a clone of the wiki repository:",
+        "5. Update the GitHub wiki (README, docs guides and this reference) from a clone of the wiki repository:",
         "   ```",
         "   git clone https://github.com/<owner>/<repo>.wiki.git ../wiki",
         "   python tools/gamedocs/gamedocs.py wiki ../wiki",
