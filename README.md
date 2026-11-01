@@ -21,7 +21,8 @@ Modding support for Solar2D Games
 > Please [open an issue here](https://github.com/Curve/chalchiu/issues/new) instead!
 
 > **Note**  
-> This is a fork of [Curve/chalchiu](https://github.com/Curve/chalchiu), updated to work with Coromon v1.5.4 (2026).
+> This is a fork of [Curve/chalchiu](https://github.com/Curve/chalchiu) by Curve, updated to work with Coromon v1.5.4 (2026) and maintained by Zreezy.  
+> Licensed under the [MIT License](LICENSE).
 
 # Introduction
 
