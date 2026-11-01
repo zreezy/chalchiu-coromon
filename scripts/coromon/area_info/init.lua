@@ -10,6 +10,7 @@ local config = settings.define({
 
 local function toast(text, intent)
   local MessageToast = globals.require("classes.interface.overlays.MessageToast")
+  log.info("[toast] " .. tostring(text))
   MessageToast:showAndHide(text, { intent = intent or "info" })
 end
 
@@ -37,7 +38,7 @@ end
 hotkeys.add(function() return config.key end, function()
   local ok, err = pcall(showAreaInfo)
   if not ok then
-    print("[area_info] " .. tostring(err))
+    log.error(tostring(err))
     pcall(toast, "Could not show area info", "warning")
   end
 end, "Show area encounters")

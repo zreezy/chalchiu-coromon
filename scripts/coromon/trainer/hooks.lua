@@ -8,6 +8,7 @@ local MessageToast = globals.require("classes.interface.overlays.MessageToast")
 local _M = {}
 
 local function message(text, intent)
+  log.info("[toast] " .. tostring(text))
   MessageToast:showAndHide(text, { intent = intent or "info" })
 end
 
@@ -191,7 +192,7 @@ for _, action in ipairs(_M.actions) do
   hotkeys.add(function() return config[settingKey] end, function()
     local ok, err = pcall(fn)
     if not ok then
-      print("[trainer] '" .. label .. "' failed: " .. tostring(err))
+      log.error("'" .. label .. "' failed: " .. tostring(err))
       pcall(message, label .. " failed", "warning")
     end
   end, label)

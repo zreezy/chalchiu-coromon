@@ -51,5 +51,9 @@ removed, delete its folder from `mods`.
   not next to `coromon.exe`. Check that you unzipped into the right folder, not into a subfolder.
 - **A mod doesn't show up or doesn't work:** open `chalchiu.log`. A mod that fails to load is skipped and the error
   is written there, the other mods still load.
+- **Something behaves oddly:** `chalchiu.log` records what you do with the mods: which popups you open and close
+  (and how), which buttons you press, setting changes and saves, hotkeys, and the messages mods show. Each game
+  start begins with a `Loading Chalchiu` line and the game version, and the file keeps earlier sessions, so the
+  most recent one is at the end. Attach it to bug reports.
 - **The game crashes:** the log ends with the module and offset of the crash. Please
   [open an issue](https://github.com/zreezy/chalchiu-coromon/issues/new) with your game version and `chalchiu.log`.

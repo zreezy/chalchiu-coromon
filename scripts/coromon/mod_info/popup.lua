@@ -4,8 +4,13 @@ local MessageToast = globals.require("classes.interface.overlays.MessageToast")
 -- The Loaded Mods popup and each mod's settings page, built on the game's AbstractSelectPopup.
 --
 -- Buttons: the blue button's label follows the selected row ("Settings", "Turn on", "Next", ...),
--- the red button (or Esc) closes the list or goes back from a settings page to the list.
+-- the red button closes the list or goes back from a settings page to the list. So do the game's
+-- Start keys (Esc, Enter, Right Shift) and Back keys (Backspace, X, Left Shift).
+-- Clicking outside the popup does nothing: the game's setCancellable would close it on any click
+-- that isn't handled by the popup, which was confusing.
 -- Settings are saved as soon as they change, there is no separate save step.
+--
+-- Everything the user does here is logged to chalchiu.log as "[mod_info] [ui] ...".
 
 local _M = {}
 
@@ -17,7 +22,12 @@ local function escape(text)
     return (tostring(text):gsub("<", "("):gsub(">", ")"))
 end
 
+local function ui(...)
+    log.info("[ui]", ...)
+end
+
 local function toast(text, intent)
+    log.info("[toast] " .. tostring(text))
     MessageToast:showAndHide(text, { intent = intent or "info" })
 end
 
@@ -32,7 +42,12 @@ local function description(text, width)
 end
 
 -- Blue button with a text label that is recreated whenever the selection changes
-local function actionButton(params, getLabel, onPress)
+local function actionButton(params, title, describe, getLabel, onPress)
+    params:setOnGridBoxSelect(function(item)
+        if item then
+            log.debug("[ui]", title .. ": selected '" .. describe(item) .. "'")
+        end
+    end)
     params:setConfirmButton(
         function(button, group, item)
             local style = globals.UIContainerStyle.gradient_blueOrFluorescent
@@ -43,15 +58,34 @@ local function actionButton(params, getLabel, onPress)
             local object = globals.textHelper:spawnPrepared(group, text)
             globals.magnet:center(object, 0, -2, button)
         end,
-        onPress,
+        function(item, closePopup)
+            ui(title .. ": pressed '" .. getLabel(item) .. "'" .. (item and (" on '" .. describe(item) .. "'") or ""))
+            onPress(item, closePopup)
+        end,
         true
     )
 end
 
--- Red button (and Esc)
-local function backButton(params, onBack)
-    params:setCancellable(onBack)
-    params:setCancellableByButton(onBack)
+-- Creates and opens the popup. The red button and the game's Start/Back keys call onBack.
+local function open(params, title, onBack)
+    params:setCancellableByButton(function()
+        ui(title .. ": red button")
+        onBack()
+    end)
+
+    local popup = AbstractSelectPopup:new(params)
+    popup:setCloseOnStartButton(function()
+        ui(title .. ": closed with a Start key (Esc, Enter or Right Shift)")
+        onBack()
+    end)
+    popup:setCloseOnBackButton(function()
+        ui(title .. ": closed with a Back key (Backspace, X or Left Shift)")
+        onBack()
+    end)
+
+    popup:open(function()
+    end)
+    ui("Opened '" .. title .. "'")
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -126,7 +160,12 @@ function _M:openSettings(modName, config, selectedKey)
         _M:openSettings(modName, config, key)
     end
 
-    actionButton(params, function(item) return actionLabel(config, item) end, function(item, closePopup)
+    local title = modName .. " Settings"
+    local function describe(item)
+        return item.entry.label .. " = " .. config:format(item.key)
+    end
+
+    actionButton(params, title, describe, function(item) return actionLabel(config, item) end, function(item, closePopup)
         if not item then
             return closePopup()
         end
@@ -134,6 +173,7 @@ function _M:openSettings(modName, config, selectedKey)
         if item.entry.type == "key" then
             closePopup(function()
                 toast("Press a key for '" .. item.entry.label .. "' (Esc: cancel, Backspace: remove)")
+                ui("Waiting for a key for '" .. item.entry.label .. "'")
                 hotkeys.capture(function(keyName)
                     if keyName == nil then
                         toast("Cancelled")
@@ -155,11 +195,8 @@ function _M:openSettings(modName, config, selectedKey)
         end
     end)
 
-    backButton(params, function()
-        _M:new(config) -- back to the list, with this mod selected
-    end)
-
-    AbstractSelectPopup:new(params):open(function()
+    open(params, title, function()
+        _M:new(config, "back from " .. title) -- back to the list, with this mod selected
     end)
 end
 
@@ -167,7 +204,13 @@ end
 -- Loaded mods list
 ---------------------------------------------------------------------------------------------------
 
-function _M:new(selectedConfig)
+-- source: what opened the list, for the log ("title screen button", "hotkey", ...)
+function _M:new(selectedConfig, source)
+    if type(selectedConfig) == "string" then
+        selectedConfig, source = nil, selectedConfig
+    end
+    ui("Opening 'Loaded Mods' (" .. tostring(source or "unknown") .. ")")
+
     local mods  = chalchiu:mods()
     local items = {}
 
@@ -209,7 +252,11 @@ function _M:new(selectedConfig)
         end)
     end
 
-    actionButton(params, function(item)
+    local function describe(item)
+        return item.name
+    end
+
+    actionButton(params, "Loaded Mods", describe, function(item)
         return (item and item.config) and "Settings" or "Close"
     end, function(item, closePopup)
         if item and item.config then
@@ -221,10 +268,8 @@ function _M:new(selectedConfig)
         end
     end)
 
-    backButton(params, function()
-    end)
-
-    AbstractSelectPopup:new(params):open(function()
+    open(params, "Loaded Mods", function()
+        ui("Closed 'Loaded Mods'")
     end)
 end
 

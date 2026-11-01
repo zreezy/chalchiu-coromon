@@ -45,6 +45,17 @@ chalchiu.detour = function(table, func, detour)
   end
 end
 
+-- Game and platform versions, for bug reports
+do
+  local ok, info = pcall(function()
+    return format("%s %s (Solar2D %s, %s)", tostring(system.getInfo("appName")), tostring(system.getInfo("appVersionString")),
+      tostring(system.getInfo("build")), tostring(system.getInfo("platform")))
+  end)
+  if ok then
+    log("info", "[game] " .. info)
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- hooks: callbacks run once per module, when it is required after registration, or right away
 -- if the game already loaded it before chalchiu started
@@ -249,7 +260,9 @@ function config_methods.save(self)
   lines[#lines + 1] = ""
 
   local ok = chalchiu.write_mod_file(rawget(self, "_id"), SETTINGS_FILE, concat(lines, "\n"))
-  if not ok then
+  if ok then
+    log("debug", "[settings] Saved mods/" .. rawget(self, "_id") .. "/" .. SETTINGS_FILE)
+  else
     log("error", "[settings] Could not save settings for '" .. rawget(self, "_id") .. "'")
   end
   return ok
@@ -266,7 +279,10 @@ function config_methods.set(self, key, value)
     error("invalid value for setting '" .. tostring(key) .. "': " .. tostring(value), 2)
   end
 
+  local previous = rawget(self, "_values")[key]
   rawget(self, "_values")[key] = normalized
+  log("info", format("[settings] '%s' %s: %s -> %s", rawget(self, "_id"), tostring(key),
+    serialize(previous), serialize(normalized)))
   self:save()
 
   for _, listener in ipairs(rawget(self, "_listeners")) do
@@ -425,6 +441,7 @@ local function on_key(event)
     if CANCEL_KEYS[keyName] then
       keyName = nil
     end
+    log("info", "[hotkeys] Captured key: " .. tostring(keyName or ("none, cancelled with " .. tostring(event.keyName))))
     local ok, err = try(callback, keyName)
     if not ok then
       log("error", "[hotkeys] Key capture callback failed: " .. tostring(err))
@@ -439,6 +456,7 @@ local function on_key(event)
       key = ok and result or nil
     end
     if key and key ~= "" and event.keyName == key then
+      log("info", "[hotkeys] " .. tostring(key) .. ": '" .. tostring(hotkey.label) .. "' (" .. tostring(hotkey.id) .. ")")
       local ok, err = try(hotkey.fn, event)
       if not ok then
         log("error", "[hotkeys] '" .. tostring(hotkey.label) .. "' from '" .. tostring(hotkey.id) .. "' failed: " .. tostring(err))
@@ -469,6 +487,7 @@ chalchiu.hotkeys = {
   end,
   capture = function(callback)
     ensure_listener()
+    log("info", "[hotkeys] Waiting for a key press (Escape cancels)")
     capture_callback = callback
   end,
   isCapturing = function()
@@ -481,6 +500,17 @@ chalchiu.hotkeys = {
 ---------------------------------------------------------------------------------------------------
 
 chalchiu._bind_mod_env = function(env, id)
+  -- log.info("...") etc. write "[<mod id>] ..." to chalchiu.log
+  env.log = {}
+  for _, level in ipairs({ "debug", "info", "warn", "error" }) do
+    env.log[level] = function(...)
+      local parts = {}
+      for i = 1, select("#", ...) do
+        parts[#parts + 1] = tostring((select(i, ...)))
+      end
+      log(level, "[" .. id .. "] " .. concat(parts, " "))
+    end
+  end
   env.hooks = {
     add = function(module, callback)
       return chalchiu.hooks.add(module, callback, id)

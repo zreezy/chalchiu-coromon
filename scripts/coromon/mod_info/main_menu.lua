@@ -20,7 +20,7 @@ local function addModsButton(screen)
     globals.inputHelper:addMouseHoverable(button, globals.UIButton:showHoverVariantOnHover())
     globals.inputHelper:addTouchable(button,
         globals.UIButton:createTouchableListener(globals.UIButtonTransition.fancyPress, function()
-            popup:new()
+            popup:new("title screen button")
         end)
     )
 end
@@ -34,12 +34,12 @@ hooks.add("classes.interface.screens.titleScreen", function(module)
         if config.mainMenuButton then
             local ok, err = pcall(addModsButton, screen)
             if not ok then
-                print("[mod_info] Could not add main menu button: " .. tostring(err))
+                log.error("Could not add main menu button: " .. tostring(err))
             end
         end
 
         if not once and config.showOnStartup then
-            popup:new()
+            popup:new("startup")
             once = true
         end
 
@@ -48,5 +48,5 @@ hooks.add("classes.interface.screens.titleScreen", function(module)
 end)
 
 hotkeys.add(function() return config.openKey end, function()
-    popup:new()
+    popup:new("hotkey")
 end, "Open mod list")

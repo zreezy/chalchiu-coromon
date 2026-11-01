@@ -70,13 +70,18 @@ local AbstractSelectPopup = {
     function params:setConfirmButton(content, onPress, recreate)
       self.content, self.onPress, self.recreate = content, onPress, recreate
     end
-    function params:setCancellable(onCancel) self.onCancel = onCancel end
+    function params:setCancellable(onCancel) self.onCancel, self.cancellable = onCancel, true end
     function params:setCancellableByButton(onCancel) self.cancelButton = onCancel end
     function params:setIsSelectedObjectFunction(fn) self.isSelected = fn end
+    function params:setOnGridBoxSelect(fn) self.onSelect = fn end
     return params
   end,
   new = function(_, params)
+    -- like the game: setCancellable also closes on Start, Back and any background click
+    params.closesOnBackgroundTouch = params.onCancel ~= nil and params.cancellable
     return {
+      setCloseOnStartButton = function(_, fn) params.onStart = fn end,
+      setCloseOnBackButton = function(_, fn) params.onBack = fn end,
       open = function()
         popups[#popups + 1] = params
         -- exercise the render and description callbacks like the game would
@@ -358,7 +363,9 @@ end
 
 -- Mod Info settings page: open trainer settings, cycle a choice, rebind a key
 local list = popups[2]
-check(list.cancelButton and list.onCancel and list.recreate, "mod list has a close button and per-row button labels")
+check(list.cancelButton and list.recreate, "mod list has a close button and per-row button labels")
+check(list.onStart and list.onBack, "Start (Esc) and Back keys close the list")
+check(not list.cancellable, "clicking outside the popup doesn't close it")
 check(buttonLabel(list, findItem(list, "name", "Coromon Trainer")) == "Settings", "button says Settings for mods with settings")
 check(buttonLabel(list, findItem(list, "name", "Text Speed+")) == "Settings", "Text Speed+ has settings")
 confirm(list, findItem(list, "name", "Coromon Trainer"))
@@ -378,9 +385,9 @@ check(trainerConfig.keyAddGold == "f7", "key rebound to f7")
 press("f7"); check(gold == 105000, "rebound key works")
 check(files["trainer/settings.lua"] and files["trainer/settings.lua"]:find('"f7"'), "settings saved to file")
 
--- Back from a settings page returns to the list with that mod selected
+-- Back from a settings page returns to the list with that mod selected (Esc here, red button below)
 local before = #popups
-popups[#popups].cancelButton()
+popups[#popups].onStart()
 local back = popups[#popups]
 check(#popups == before + 1 and back.title == "Loaded Mods", "back button returns to the mod list")
 check(back.isSelected and back.isSelected(back.items[findItem(back, "name", "Coromon Trainer")]), "returning keeps the mod selected")
@@ -396,6 +403,25 @@ confirm(modInfoPage, startupIndex)
 check(chalchiu.settings.get("mod_info"):get("showOnStartup") == not wasOn, "boolean toggled")
 modInfoPage = popups[#popups]
 check(buttonLabel(modInfoPage, startupIndex) == (wasOn and "Turn on" or "Turn off"), "label follows the new value")
+local count = #popups
+modInfoPage.cancelButton()
+check(#popups == count + 1 and popups[#popups].title == "Loaded Mods", "red button goes back to the list")
+
+-- The log shows what happened in the UI and to settings
+local function logged(pattern)
+  for _, entry in ipairs(logs) do
+    if entry.message:find(pattern) then return true end
+  end
+end
+check(logged("%[mod_info%] %[ui%] Opening 'Loaded Mods' %(startup%)"), "log: list opened on startup")
+check(logged("%[ui%] Coromon Trainer Settings: pressed 'Next' on 'Items per press"), "log: button press")
+check(logged("closed with a Start key"), "log: Esc")
+check(logged("Mod Info Settings: red button"), "log: red button")
+check(logged("%[settings%] 'trainer' keyAddGold: \"numPad4\" %-> \"f7\""), "log: setting change")
+check(logged("%[settings%] Saved mods/trainer/settings.lua"), "log: settings saved")
+check(logged("%[hotkeys%] Captured key: f7"), "log: key capture")
+check(logged("%[hotkeys%] f7: 'Add Gold' %(trainer%)"), "log: hotkey press")
+check(logged("%[trainer%] %[toast%]"), "log: toasts")
 
 -- No errors logged anywhere
 for _, entry in ipairs(logs) do

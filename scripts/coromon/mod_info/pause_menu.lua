@@ -12,7 +12,7 @@ local ok, innerNavBarObjectBuilder = pcall(globals.require,
   "classes.interface.navBarObjects.abstractInnerNavBarObjectBuilder")
 
 if not ok then
-  print("[mod_info] Pause menu button unavailable on this game version: " .. tostring(innerNavBarObjectBuilder))
+  log.warn("Pause menu button unavailable on this game version: " .. tostring(innerNavBarObjectBuilder))
   return
 end
 
@@ -30,7 +30,7 @@ local function makeButton()
 
   globals.inputHelper:addTouchable(button,
     globals.UIButton:createTouchableListener(globals.UIButtonTransition.fancyPress, function()
-      popup:new()
+      popup:new("pause menu button")
     end)
   )
 
@@ -51,7 +51,7 @@ hooks.add("classes.interface.screens.SquadScreen", function(builder)
     end)
 
     if not added then
-      print("[mod_info] Could not add pause menu button: " .. tostring(err))
+      log.error("Could not add pause menu button: " .. tostring(err))
     end
 
     return screen

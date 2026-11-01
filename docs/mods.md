@@ -22,7 +22,11 @@ Every mod's settings, including all hotkeys, can be changed in-game:
    - **Turn on** / **Turn off** for on/off settings,
    - **Next** to step to the next value or option,
    - **Set key** for hotkeys: press the new key, `Esc` to cancel or `Backspace` to remove the key.
-4. Press the red button (or `Esc`) to go back to the list, and again to close it.
+4. Press the red button (or `Esc` / `Backspace`) to go back to the list, and again to close it. Clicking outside
+   the popup does nothing.
+
+Coromon's keys apply here too: `Space` or `Z` presses the blue button, and the game's Start keys (`Esc`, `Enter`,
+`Right Shift`) and Back keys (`Backspace`, `X`, `Left Shift`) go back.
 
 Changes are saved right away to `mods/<mod>/settings.lua`, there is no save button. You can also edit that file
 directly while the game is closed. Delete it to go back to the defaults.

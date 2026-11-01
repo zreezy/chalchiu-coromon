@@ -12,6 +12,7 @@ local config = settings.define({
 
 local function alert(text)
   local MessageToast = globals.require("classes.interface.overlays.MessageToast")
+  log.info("[toast] " .. tostring(text))
   MessageToast:showAndHide(text, { intent = "success" })
 
   if config.sound then
@@ -25,7 +26,7 @@ local function wrap(stats, functionName, settingKey, text)
     if config[settingKey] then
       local ok, err = pcall(alert, text)
       if not ok then
-        print("[potent_alert] " .. tostring(err))
+        log.error(tostring(err))
       end
     end
     return result

@@ -3,6 +3,22 @@
 Releases are published automatically when the version in `CMakeLists.txt` changes.
 The section for that version below becomes the release notes.
 
+## [3.2.2] - 2026-11-01
+
+### Mod Info (v1.6)
+- Clicking outside the popup no longer closes it or goes back. Use the red button, `Esc` or `Backspace`.
+- `Backspace`, `X` and `Left Shift` (the game's Back keys) now go back too. `Enter` still goes back like in the
+  game's own popups, because the game treats it as a Start key, like `Esc`.
+
+### More detailed log
+- `chalchiu.log` now records Mod Info activity (which popup opened and from where, selected rows, button presses,
+  and whether you went back with the red button, a Start key or a Back key), every setting change and save,
+  hotkey presses, key rebinding, and the messages mods show on screen.
+- The game version is logged at startup.
+
+### For modders
+- New `log.debug/info/warn/error(...)` for mods, tagged with the mod's folder name.
+
 ## [3.2.1] - 2026-11-01
 
 ### Mod Info (v1.5)

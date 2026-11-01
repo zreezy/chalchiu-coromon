@@ -78,6 +78,17 @@ hotkeys.add(function() return config.hotkey end, function()
 end, "Do the thing")
 ```
 
+## Logging
+
+`log.debug`, `log.info`, `log.warn` and `log.error` write to `chalchiu.log`, tagged with your mod's folder name.
+`print` is also written to the log (as `[print]`), but without the tag.
+
+```lua
+log.info("Gave", amount, "gold") -- [my_mod] Gave 5000 gold
+```
+
+chalchiu itself logs setting changes and saves, hotkey presses and key captures.
+
 ## Globals
 
 Each mod runs in its own Lua environment and can't write to the game's globals directly. `globals` is the game's

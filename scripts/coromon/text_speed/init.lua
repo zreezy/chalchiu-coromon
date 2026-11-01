@@ -37,7 +37,7 @@ hooks.add("classes.modules.textHelper", function(textHelper)
   -- The game already applied its own setting at startup, apply ours now
   local ok, err = pcall(apply)
   if not ok then
-    print("[text_speed] " .. tostring(err))
+    log.error(tostring(err))
   end
 end)
 

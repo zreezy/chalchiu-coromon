@@ -6,5 +6,5 @@ return {
     description = 'Shows the installed mods and lets you change their settings.',
     name        = 'Mod Info',
     author      = 'Curve',
-    version     = 'v1.5',
+    version     = 'v1.6',
 }
