@@ -37,7 +37,13 @@ jobs:
 
       - name: Compile
         run: |
-          cmake -S . -B build -DIS_CI=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake
+          # Builds of anything but main are test builds: version "x.y.z-test.<commit>", never released
+          suffix=""
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            suffix="-test.${GITHUB_SHA::7}"
+          fi
+          cmake -S . -B build -DIS_CI=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake \
+            -DCHALCHIU_VERSION_SUFFIX="$suffix"
           cmake --build build --config Release -j
 
       - name: Check imports

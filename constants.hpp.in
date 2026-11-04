@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-#define CHALCHIU_VERSION "${PROJECT_VERSION}"
+#define CHALCHIU_VERSION "${PROJECT_VERSION}${CHALCHIU_VERSION_SUFFIX}"
 
 namespace chalchiu
 {

@@ -11,5 +11,5 @@ return {
 	name        = 'Coromon Trainer',
 	description = getDescription(),
 	author      = 'Curve',
-	version     = 'v1.5',
+	version     = 'v1.6',
 }

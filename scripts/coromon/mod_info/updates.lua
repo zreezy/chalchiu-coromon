@@ -17,17 +17,21 @@ local _M = {
     latest = nil, -- { version = "3.4.0", url = "https://github.com/..." } when a newer release exists
 }
 
+-- "3.5.0-test.1a2b3c4" -> { 3, 5, 0 }, "-test.1a2b3c4"
 local function parseVersion(text)
+    local numbers, suffix = tostring(text or ""):gsub("^v", ""):match("^([%d%.]*)(.*)$")
     local parts = {}
-    for number in tostring(text or ""):gmatch("%d+") do
+    for number in (numbers or ""):gmatch("%d+") do
         parts[#parts + 1] = tonumber(number)
     end
-    return parts
+    return parts, suffix or ""
 end
 
--- true if version a is newer than version b ("3.10.0" > "3.9.1")
+-- true if version a is newer than version b ("3.10.0" > "3.9.1"). A test build ("3.5.0-test.1a2b3c4")
+-- is older than the release with the same number, so testers are told when the real 3.5.0 is out.
 function _M.isNewer(a, b)
-    local x, y = parseVersion(a), parseVersion(b)
+    local x, xs = parseVersion(a)
+    local y, ys = parseVersion(b)
     if #x == 0 or #y == 0 then
         return false
     end
@@ -37,7 +41,7 @@ function _M.isNewer(a, b)
             return p > q
         end
     end
-    return false
+    return xs == "" and ys ~= ""
 end
 
 local function toast(text)

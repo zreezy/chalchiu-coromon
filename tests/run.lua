@@ -143,6 +143,8 @@ for i = 1, 3 do
     level = 5, potential = 1,
     tryIncreaseLevel = function(self, n) self.level = self.level + n end,
     setPotential = function(self, p) self.potential = p end,
+    getPotential = function(self) return self.potential end,
+    getAvailablePotentialCategories = function(self) return self.titan and { "A" } or { "A", "B", "C" } end,
     setHealthToMaxHealth = function() end,
     setEnergyToMaxOverchargedEnergy = function() end,
   }
@@ -349,6 +351,13 @@ press("numPad+"); check(display.timeScale == 1.5, "speed up")
 press("numPad*"); check(display.timeScale == 1, "speed reset")
 press("numPad1"); check(debugSettings.battle.alwaysCatchSuccessfully, "catch all")
 press("numPad2"); check(debugSettings.coromon1.skipWildBattles, "skip wild")
+monsters[2].titan = true
+press("numPad."); check(monsters[1].potential == 21 and monsters[3].potential == 21 and monsters[1].level == 5,
+  "max potential sets only the potential")
+check(monsters[2].potential == 1, "max potential skips Coromon without potential categories")
+check(lastToast():find("Set 2 Coromon to perfect potential"), "max potential message")
+press("numPad."); check(lastToast():find("already at perfect potential"), "max potential when already maxed")
+monsters[2].titan = nil
 press("numPad3"); check(monsters[1].level == 105 and monsters[3].potential == 21, "max squad")
 press("numPad4"); check(gold == 5000, "add gold")
 press("numPad5"); check(debugSettings.coromon1.skipTrainerBattles, "skip trainer battles")
@@ -496,6 +505,19 @@ check(logged("%[settings%] Saved mods/trainer/settings.lua"), "log: settings sav
 check(logged("%[hotkeys%] Captured key: f7"), "log: key capture")
 check(logged("%[hotkeys%] f7: 'Add Gold' %(trainer%)"), "log: hotkey press")
 check(logged("%[trainer%] %[toast%]"), "log: toasts")
+
+-- Update check version comparison, including test builds ("3.5.0-test.<commit>" is older than "3.5.0")
+do
+  local src = assert(io.open(root .. "/scripts/coromon/mod_info/updates.lua")):read("*a")
+  local a, b = src:match("(local function parseVersion.-\nend)\n.-(function _M%.isNewer.-\nend)\n")
+  local versions = assert(loadstring("local _M = {}\n" .. a .. "\n" .. b .. "\nreturn _M"))()
+  for _, c in ipairs({
+    { "3.5.0", "3.4.1", true }, { "3.10.0", "3.9.1", true }, { "3.5.0", "3.5.0", false },
+    { "3.5.0", "3.5.0-test.1a2b3c4", true }, { "3.5.0-test.1a2b3c4", "3.5.0", false }, { "3.4.1", "3.5.0-test.1a2b3c4", false },
+  }) do
+    check(versions.isNewer(c[1], c[2]) == c[3], "isNewer(" .. c[1] .. ", " .. c[2] .. ")")
+  end
+end
 
 -- No errors logged anywhere
 for _, entry in ipairs(logs) do

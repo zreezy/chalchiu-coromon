@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(chalchiu LANGUAGES CXX VERSION 3.4.1)
+project(chalchiu LANGUAGES CXX VERSION 3.5.0)
 
 # --------------------------------------------------------------------------------------------------------
 # Setup Cross-Compilation on Linux
@@ -37,6 +37,9 @@ endif()
 # Generate "constants" file
 # --------------------------------------------------------------------------------------------------------
 
+# Test builds (CI on branches other than main) add a suffix such as "-test.1a2b3c4" to the version, so the
+# window title and chalchiu.log show which build is running. Releases have no suffix.
+set(CHALCHIU_VERSION_SUFFIX "" CACHE STRING "Appended to the version, e.g. -test.1a2b3c4")
 configure_file("constants.hpp.in" "${CMAKE_CURRENT_SOURCE_DIR}/private/constants.hpp")
 
 # Embed the Lua part of the runtime (src/runtime.lua) as a string

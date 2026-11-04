@@ -90,6 +90,8 @@ local function itemLabel(uid)
   return uid
 end
 
+local MAX_POTENTIAL = 21
+
 ---------------------------------------------------------------------------------------------------
 -- Settings
 ---------------------------------------------------------------------------------------------------
@@ -107,6 +109,7 @@ local config = settings.define({
   key("keyCatchAll", "Key: Catch all Coromon", "numPad1"),
   key("keySkipWild", "Key: Skip wild battles", "numPad2"),
   key("keyMaxSquad", "Key: Max out squad", "numPad3"),
+  key("keyMaxPotential", "Key: Max potential (squad)", "numPad."),
   key("keyAddGold", "Key: Add gold", "numPad4"),
   {
     key = "goldAmount", label = "Add gold: amount", type = "choice", default = 5000,
@@ -150,13 +153,39 @@ _M.actions = {
     local count = 0
     for _, v in ipairs(globals.playerMonsters:getSquad()) do
       v:tryIncreaseLevel(100)
-      v:setPotential(21)
+      v:setPotential(MAX_POTENTIAL)
       v:setHealthToMaxHealth()
       v:setEnergyToMaxOverchargedEnergy()
       count = count + 1
     end
 
     message("Maxed out " .. count .. " Coromon", "success")
+  end },
+  -- Only the potential: 21 is the highest and makes a Coromon perfect (17-20 potent, 16 and below normal,
+  -- see monsterUtility:getPotentialCategoryForPotential). Its look follows unless the player picked a
+  -- different look in the Skins tab. Levels, health and energy are left alone.
+  { "keyMaxPotential", "Max Potential", function()
+    if inOnlineBattle() then
+      return message("Max Potential is disabled in online battles", "warning")
+    end
+
+    local changed, total = 0, 0
+    for _, v in ipairs(globals.playerMonsters:getSquad()) do
+      local categories = v.getAvailablePotentialCategories and v:getAvailablePotentialCategories()
+      if not categories or #categories > 1 then -- titans and the like have no potential categories
+        total = total + 1
+        if (v:getPotential() or 0) < MAX_POTENTIAL then
+          v:setPotential(MAX_POTENTIAL)
+          changed = changed + 1
+        end
+      end
+    end
+
+    if changed == 0 then
+      message(total == 0 and "No Coromon in your squad can have potential" or "Your squad is already at perfect potential")
+    else
+      message("Set " .. changed .. " Coromon to perfect potential (" .. MAX_POTENTIAL .. ")", "success")
+    end
   end },
   { "keyAddGold", "Add Gold", function()
     globals.playerCurrency:addGold(config.goldAmount)

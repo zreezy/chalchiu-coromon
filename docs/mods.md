@@ -71,7 +71,8 @@ can't be turned on during one.
 | `numPad/` | Toggle noclip |
 | `numPad1` | Catch all Coromon |
 | `numPad2` | Skip wild battles |
-| `numPad3` | Max out squad |
+| `numPad3` | Max out squad (level, potential, health and energy) |
+| `numPad.` | Max potential only: sets your squad to perfect potential (21), nothing else |
 | `numPad4` | Add gold |
 | `numPad5` | Skip trainer battles |
 | `numPad6` | No energy cost |

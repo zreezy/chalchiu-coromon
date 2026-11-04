@@ -54,7 +54,7 @@ To **update**, unzip a new release over the old files. Your mod settings are kep
 | Mod | What it does | Settings |
 |---|---|---|
 | **Mod Info** | Lists the installed mods, lets you change their settings in-game (title screen **Mods** button), and tells you when an update is out | <img src="assets/settings_mod_info.jpg" alt="Mod Info settings" width="240"> |
-| **Coromon Trainer** | Hotkeys for game speed, noclip, catch all, skipping battles, maxing your squad, gold, items and more | <img src="assets/settings_trainer.jpg" alt="Coromon Trainer settings" width="240"> |
+| **Coromon Trainer** | Hotkeys for game speed, noclip, catch all, skipping battles, maxing your squad or just its potential, gold, items and more | <img src="assets/settings_trainer.jpg" alt="Coromon Trainer settings" width="240"> |
 | **Potent Alert** | Notification and sound when a potent or perfect Coromon appears | <img src="assets/settings_potent_alert.jpg" alt="Potent Alert settings" width="240"> |
 | **XP & Gold Boost** | Multiplies battle XP (2x by default) and trainer gold. No effect online | <img src="assets/settings_xp_gold_boost.jpg" alt="XP & Gold Boost settings" width="240"> |
 | **Text Speed+** | Dialogue text faster than the game's 3x maximum (6x by default) | <img src="assets/settings_text_speed.jpg" alt="Text Speed+ settings" width="240"> |

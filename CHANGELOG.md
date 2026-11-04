@@ -3,6 +3,18 @@
 Releases are published automatically when the version in `CMakeLists.txt` changes.
 The section for that version below becomes the release notes.
 
+## [3.5.0] - 2026-11-04
+
+### Coromon Trainer (v1.6)
+- New **Max Potential** hotkey (`numPad.`, the numpad decimal point): sets every Coromon in your squad to perfect
+  potential (21) and changes nothing else, so you can keep levelling them yourself. They get the perfect look too,
+  unless you picked a different look in the Skins tab. Disabled in online battles, and can be rebound in the
+  trainer's settings like the other keys.
+
+### For modders
+- Builds of branches other than `main` are test builds: their version ends in `-test.<commit>` and they're never
+  released. See [Releasing](docs/releasing.md).
+
 ## [3.4.1] - 2026-11-01
 
 New here? chalchiu adds mods to Coromon v1.5.4: an in-game mod menu with settings for every mod (**Mods** button on
