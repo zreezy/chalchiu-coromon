@@ -121,6 +121,12 @@ jobs:
             END { if (buf != "") print buf }
           ')
 
+          # Relative links (e.g. docs/releasing.md) don't work on release pages: point them at the repository
+          changes=$(printf '%s\n' "$changes" | sed -E \
+            -e 's#\]\((https?://|\#)#](KEEP\1#g' \
+            -e "s#\\]\\(([^K)][^)]*)\\)#](https://github.com/${GITHUB_REPOSITORY}/blob/main/\\1)#g" \
+            -e 's#\]\(KEEP#](#g')
+
           if [ -z "$changes" ]; then
             changes=$(git log -1 --format='%s%n%n%b')
           fi
