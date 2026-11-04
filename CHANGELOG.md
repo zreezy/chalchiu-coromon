@@ -10,6 +10,7 @@ The section for that version below becomes the release notes.
   potential (21) and changes nothing else, so you can keep levelling them yourself. They get the perfect look too,
   unless you picked a different look in the Skins tab. Disabled in online battles, and can be rebound in the
   trainer's settings like the other keys.
+- If a Coromon's summary is open when you press it, switch tabs to see the change. Save the game to keep it.
 
 ### For modders
 - Builds of branches other than `main` are test builds: their version ends in `-test.<commit>` and they're never
